@@ -55,7 +55,7 @@ private:
 	INT GetCalculatedMarginForDpi(INT marginOrientation) const;
 	CRect NewRectForExplorerBrowser();
 	BOOL IsDarkMode() const;
-	void PaintTitle();
+	void PaintTitle(CPaintDC* pDC);
 	void SetGroupingByName();
 
 // 构造

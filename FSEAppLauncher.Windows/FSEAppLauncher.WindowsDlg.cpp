@@ -86,9 +86,9 @@ BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 //  这将由框架自动完成。
 
 void CFSEAppLauncherWindowsDlg::OnPaint() {
-	if (IsIconic()) {
-		CPaintDC dc(this); // 用于绘制的设备上下文
+	CPaintDC dc(this); // 用于绘制的设备上下文
 
+	if (IsIconic()) {
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
 		int iDpi = GetDpiForWindow(GetSafeHwnd());
@@ -108,7 +108,7 @@ void CFSEAppLauncherWindowsDlg::OnPaint() {
 		CDialogEx::OnPaint();
 	}
 
-	PaintTitle();
+	PaintTitle(&dc);
 }
 
 
@@ -584,7 +584,7 @@ BOOL CFSEAppLauncherWindowsDlg::IsDarkMode() const {
 
 
 // Paint the title on the custom frame.
-void CFSEAppLauncherWindowsDlg::PaintTitle() {
+void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 	CRect rcClient;
 	GetClientRect(&rcClient);
 
@@ -593,7 +593,6 @@ void CFSEAppLauncherWindowsDlg::PaintTitle() {
 		return;
 	}
 
-	CDC* pDC = GetDC();
 	CDC pDCPaint;
 	if (pDCPaint.CreateCompatibleDC(pDC)) {
 		int cx = rcClient.Width();
@@ -664,7 +663,6 @@ void CFSEAppLauncherWindowsDlg::PaintTitle() {
 			}
 			DeleteObject(hbm);
 		}
-		ReleaseDC(pDC);
 	}
 	CloseThemeData(hTheme);
 }
