@@ -13,17 +13,17 @@
 
 ## Highlights
 
-- Supports **setting it as a home app** on devices compatible with the **FSE**[^1] feature (see "System Requirements").
+- Supports **setting it as home app** on devices compatible with the **FSE**[^1] feature (see "System Requirements").
 - Supports launching **any** app (including non-game apps) **under FSE[^1]**, **eliminating the need to switch back and forth between FSE[^1] and desktop**.
 - Provides the **native right-click menu** based on Windows Shell, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as **a substitute to the all apps list of Start Menu**.
 
 ## System Requirements
 
-##### Minimum requirements
+#### Minimum requirements
 
 - Windows 11, version 24H2+
 
-##### Other requirements (if you intend to set the application as home app of full screen experience)
+#### Other requirements (if you intend to set the application as home app of full screen experience)
 
 - Windows 11, version 25H2+
 - The device is a gaming handheld
@@ -38,7 +38,7 @@
 
 ## Installation and Configuration
 
-##### 1. Download package from Github
+#### 1. Download package from Github
 
 - Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download the archive below the Assets section.
 <p align="center">
@@ -49,7 +49,7 @@
 
 - Extract the archive to any directory of your choice.
 
-##### 2. Install the developer certificate
+#### 2. Install the developer certificate
 
 - Right-click (or press and hold on) the security certificate file (*.cer), then select "Install Certificate".
 <p align="center">
@@ -80,9 +80,10 @@
  </picture>
 </p>
 
-##### 3. Install the dependency
+#### 3. Install the dependency
 
 - Double click the dependency "Microsoft.VCLibs.x64.14.00.Desktop.appx" and then click "Install".
+
   ℹ️ If the installation fails and prompts "There's a newer version of this package already installed. To install this older package instead, uninstall the one currently on your system (0x80073D06)", it indicates that the dependency is **already installed**, and **you can directly install the application**.
 <p align="center">
  <picture>
@@ -90,11 +91,11 @@
  </picture>
 </p>
 
-##### 4. Install the application
+#### 4. Install the application
 
 - After installing the certificate and dependency, you can install the application by double clicking "FSEAppLauncher...x64.msix" and then click "Install".
 
-##### 5. Configure the application as the home app[^2]
+#### 5. Configure the application as the home app[^2]
 
 - Open System Settings, click "Gaming", then click "Full screen experience".
 - Beside "Choose home app", select "App Launcher for Windows", and enable "Enter full screen experience on startup".
@@ -107,7 +108,7 @@
 
 ## What's new
 
-##### General Availability - Version 26.23.31455.0
+#### General Availability - Version 26.23.31455.0
 
 - Fixed the bug that the client area is black on elastic overscroll.
 
@@ -116,6 +117,7 @@
 Use the toolchain to develop:
 
 - Windows 10, version 1607+
+
 - Microsoft Visual Studio 2017+
 	- C++ desktop development
 		- MSVC v141
