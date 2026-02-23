@@ -1,14 +1,21 @@
-# FSE App Launcher for Windows
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/FSEAppLauncher-Hero_OpenSource.png" />
+ </picture>
+</p>
+<h1 align="center">
+ <span>FSE App Launcher for Windows</span>
+</h1>
+<p align="center">
+ <span align="center">FSE App Launcher is a lightweight app launcher designed for Xbox full screen experience (FSE) on Windows 11.</span>
+</p>
 
----
-
-FSE App Launcher is a lightweight app launcher compatible with full screen experience (FSE)[^1] on Windows 11.
 
 ## Highlights
 
-- Provides the native list view and right-click menu based on Windows Shell, with an experience similar to the "All apps" list in the Start menu.
-
-- Supports setting it as a home app on devices that support the full screen experience feature (see "System Requirements").
+- Supports **setting it as a home app** on devices compatible with the **FSE**[^1] feature (see "System Requirements").
+- Supports launching **any** app (including non-game apps) **under FSE[^1]**, **eliminating the need to switch back and forth between FSE[^1] and desktop**.
+- Provides the **native right-click menu** based on Windows Shell, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as **a substitute to the all apps list of Start Menu**.
 
 ## System Requirements
 
@@ -21,63 +28,94 @@ FSE App Launcher is a lightweight app launcher compatible with full screen exper
 - Windows 11, version 25H2+
 - The device is a gaming handheld
 
+## Screenshots
+
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/Screenshot_OpenSource.png" />
+ </picture>
+</p>
+
 ## Installation and Configuration
 
 ##### 1. Download package from Github
 
-- Go to the Releases page, click Assets to reveal the downloads, and download the archive.
+- Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download the archive below the Assets section.
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/DownloadReleaseArchive_OpenSource.png" />
+ </picture>
+</p>
+
 - Extract the archive to any directory of your choice.
 
 ##### 2. Install the developer certificate
 
-- Right-click (or press and hold on) the security certificate file (usually "FSEAppLauncher.WAP...x64.cer"), select "Show more options", then select "<u>I</u>nstall Certificate".
-
-![image-20260220000902249](C:/Users/YXY/AppData/Roaming/Typora/typora-user-images/image-20260220000902249.png)
+- Right-click (or press and hold on) the security certificate file (*.cer), then select "Install Certificate".
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/InstallCertificate_OpenSource_1.png" />
+ </picture>
+</p>
 
 - Select "<u>L</u>ocal Machine", then click "<u>N</u>ext".
-
-![uwp-cert-2](C:/Users/YXY/AppData/Local/Temp/uwp-cert-2.png)
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/InstallCertificate_OpenSource_2.png" />
+ </picture>
+</p>
 
 - If the User Account Control dialog appears, click "Yes" to approve the request.
+- Select "<u>P</u>lace all certificates in the following store", and click "B<u>r</u>owse...". Select "Trusted Root Certification Authorities", click "OK", then click "<u>N</u>ext".
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/InstallCertificate_OpenSource_3.png" />
+ </picture>
+</p>
 
-- Select "<u>P</u>lace all certificates in the following store", then click "B<u>r</u>owse...".
-
-![uwp-cert-3](C:/Users/YXY/AppData/Local/Temp/uwp-cert-3.png)
-
-- Select "Trusted Root Certification Authorities", then click "OK".
-
-![uwp-cert-4](C:/Users/YXY/AppData/Local/Temp/uwp-cert-4.png)
-
-- Click "<u>N</u>ext", then click "<u>F</u>inish".
+- Click "<u>F</u>inish".
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/InstallCertificate_OpenSource_4.png" />
+ </picture>
+</p>
 
 ##### 3. Install the dependency
 
-Double click the dependency "Microsoft.VCLibs.x64.14.00.Desktop.appx" and then click "Install".
+- Double click the dependency "Microsoft.VCLibs.x64.14.00.Desktop.appx" and then click "Install".
+  ℹ️ If the installation fails and prompts "There's a newer version of this package already installed. To install this older package instead, uninstall the one currently on your system (0x80073D06)", it indicates that the dependency is **already installed**, and **you can directly install the application**.
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/InstallDependency.AlreadyInstalled_OpenSource.png" />
+ </picture>
+</p>
 
 ##### 4. Install the application
 
-After installing the certificate and dependency, you can install the application by double clicking "FSEAppLauncher.WAP...x64.msix" and then click "Install".
+- After installing the certificate and dependency, you can install the application by double clicking "FSEAppLauncher...x64.msix" and then click "Install".
 
-##### 5. Configure the application as the home app
+##### 5. Configure the application as the home app[^2]
 
-Open System Settings, click "Gaming", then click "Full screen experience"[^2].
-
-Beside "Choose home app", select "App Launcher for Windows", and enable "Enter full screen experience on startup"[^2].
-
-Optionally enable "Show accessibility control hints in Task View" based on your needs.
+- Open System Settings, click "Gaming", then click "Full screen experience".
+- Beside "Choose home app", select "App Launcher for Windows", and enable "Enter full screen experience on startup".
+- Optionally enable "Show accessibility control hints in Task View" based on your needs.
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/ConfigureFSE_OpenSource.png" />
+ </picture>
+</p>
 
 ## What's new
 
-##### Version 26.23.27360.0 (Feb 2026)
+##### General Availability - Version 26.23.31455.0
 
-Initial release.
+- Fixed the bug that the client area is black on elastic overscroll.
 
 ## Developing and debugging
 
 Use the toolchain to develop:
 
 - Windows 10, version 1607+
-
 - Microsoft Visual Studio 2017+
 	- C++ desktop development
 		- MSVC v141
@@ -92,9 +130,7 @@ This project welcomes contributions of all types, including new features, bug fi
 
 ## Privacy
 
-The application needs to access your app list to display the "Apps" page.
-
-Your user information will not be sent to any organization or individual.
+The application needs to access your app list to display the "Apps" page. Your user information will not be sent to any organization or individual.
 
 ## License
 
@@ -104,5 +140,5 @@ This means unlicensed works, modifications, and larger works may be distributed 
 
 
 
-[^1]: Also known as "Xbox full screen experience" and "Xbox FSE". In fact, "Xbox" is not part of the official name of this feature. This prefix depends on the home app chosen.
+[^1]: Also known as "Xbox Handheld Mode".
 [^2]: If your operating system version is lower than Windows 11, version 25H2, or your device is not a gaming handheld, you may not see "Full screen experience", and some options may not appear.
