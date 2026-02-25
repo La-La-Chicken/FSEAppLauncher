@@ -492,58 +492,34 @@ HRESULT CFSEAppLauncherWindowsDlg::ExtendFrameIntoClientArea() {
 
 INT CFSEAppLauncherWindowsDlg::GetCalculatedMarginForDpi(INT marginOrientation) const {
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
-	int margin;
 
 	switch (marginOrientation) {
 	case Left:
-		margin = MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER,
-		                                       GetDpiForWindow(GetSafeHwnd())) +
-		                m_ncPaddingNormal,
-		                iDpi,
-		                USER_DEFAULT_SCREEN_DPI);
-		break;
+		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
+		              iDpi,
+		              USER_DEFAULT_SCREEN_DPI);
 
 	case Top:
-		margin = MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER,
-		                                       GetDpiForWindow(GetSafeHwnd())) +
-		                m_ncPaddingNormal + m_ncPaddingTopIncrement,
-		                iDpi,
-		                USER_DEFAULT_SCREEN_DPI);
-		break;
+		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) +
+		              m_ncPaddingNormal + m_ncPaddingTopIncrement,
+		              iDpi,
+		              USER_DEFAULT_SCREEN_DPI);
 
 	case Right:
-		margin = MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER,
-		                                       GetDpiForWindow(GetSafeHwnd())) +
-		                m_ncPaddingNormal,
-		                iDpi,
-		                USER_DEFAULT_SCREEN_DPI);
-		break;
+		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
+		              iDpi,
+		              USER_DEFAULT_SCREEN_DPI);
 
 	case Bottom:
-		margin = MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER,
-		                                       GetDpiForWindow(GetSafeHwnd())) +
-		                m_ncPaddingNormal,
-		                iDpi,
-		                USER_DEFAULT_SCREEN_DPI);
-		break;
-
-	case TitleTop:
-		margin = MulDiv(m_titlePaddingTop,
-		                iDpi,
-		                USER_DEFAULT_SCREEN_DPI);
-		break;
-
-	case TitleHeight:
-		margin = MulDiv(m_titleRectHeight,
-		                iDpi,
-		                USER_DEFAULT_SCREEN_DPI);
-		break;
+		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
+		              iDpi,
+		              USER_DEFAULT_SCREEN_DPI);
 
 	default:
 		AfxMessageBox(_T("Error: Invalid parameter."));
 	}
 
-	return margin;
+	return 0;
 }
 
 
@@ -610,10 +586,15 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		dib.bmiHeader.biBitCount = 32;
 		dib.bmiHeader.biCompression = BI_RGB;
 
-		HBITMAP hbm = CreateDIBSection(
-						pDC->m_hDC, &dib, DIB_RGB_COLORS, NULL, NULL, 0);
+		HBITMAP hbm = CreateDIBSection(pDC->m_hDC,
+		                               &dib,
+		                               DIB_RGB_COLORS,
+		                               NULL,
+		                               NULL,
+		                               0);
 		if (hbm) {
 			CBitmap* pBmOld = CBitmap::FromHandle((HBITMAP)pDCPaint.SelectObject(hbm));
+			int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 			// Setup the theme drawing options.
 			DTTOPTS DttOpts = {sizeof(DTTOPTS)};
@@ -626,9 +607,7 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 			CFont* fontOld = NULL;
 			LOGFONT lgFont;
 			if (SUCCEEDED(GetThemeSysFont(hTheme, TMT_CAPTIONFONT, &lgFont))) {
-				int nHeight = -MulDiv(28,
-				                      GetDpiForWindow(GetSafeHwnd()),
-				                      USER_DEFAULT_SCREEN_DPI);
+				int nHeight = -MulDiv(28, iDpi, USER_DEFAULT_SCREEN_DPI);
 				lgFont.lfHeight = nHeight;
 				lgFont.lfWeight = FW_SEMIBOLD;
 				wcscpy_s(lgFont.lfFaceName, LF_FACESIZE, L"Segoe UI Variable Display");
@@ -640,9 +619,10 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 			// Draw the title.
 			CRect rcPaint = rcClient;
 			rcPaint.left += GetCalculatedMarginForDpi(Left);
-			rcPaint.top += GetCalculatedMarginForDpi(TitleTop);
+			rcPaint.top += MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
 			rcPaint.right -= GetCalculatedMarginForDpi(Right);
-			rcPaint.bottom = rcPaint.top + GetCalculatedMarginForDpi(TitleHeight);
+			rcPaint.bottom = rcPaint.top +
+			                 MulDiv(m_titleRectHeight, iDpi, USER_DEFAULT_SCREEN_DPI);
 			DrawThemeTextEx(hTheme,
 			                pDCPaint.m_hDC,
 			                0,

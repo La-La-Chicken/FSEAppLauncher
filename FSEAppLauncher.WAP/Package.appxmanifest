@@ -13,7 +13,7 @@
 	<Identity
 	 Name="FSEAppLauncher"
 	 Publisher="CN=YXY"
-	 Version="26.23.31455.0" />
+	 Version="26.23.36044.0" />
 
 	<Properties>
 		<DisplayName>FSE App Launcher for Windows</DisplayName>
