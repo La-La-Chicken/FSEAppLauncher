@@ -77,6 +77,8 @@ BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 		return FALSE;
 	}
 
+	CreateButtons();  // 创建按钮
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 }
 
@@ -116,6 +118,19 @@ void CFSEAppLauncherWindowsDlg::OnPaint() {
 //显示。
 HCURSOR CFSEAppLauncherWindowsDlg::OnQueryDragIcon() {
 	return static_cast<HCURSOR>(m_hIcon);
+}
+
+
+BOOL CFSEAppLauncherWindowsDlg::OnCommand(WPARAM wParam, LPARAM lParam) {
+	if (HIWORD(wParam) == BN_CLICKED) {
+		int nID = LOWORD(wParam);
+		int index = nID - IDC_LAUNCHER_BTN_BASE;
+		if (index >= 0 && index < (int)m_buttons.size()) {
+			m_buttons[index]->Launch();
+			return TRUE;
+		}
+	}
+	return CDialogEx::OnCommand(wParam, lParam);
 }
 
 
@@ -247,6 +262,8 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 		m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
 	}
 
+	UpdateButtonLayout();  // 更新按钮布局
+
 	return 0;
 }
 
@@ -330,6 +347,8 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 	if (m_pExplorerBrowser) {
 		m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
 	}
+
+	UpdateButtonLayout();
 }
 
 
@@ -405,6 +424,71 @@ BOOL CFSEAppLauncherWindowsDlg::CheckActiveWindow() {
 	CloseHandle(hProcess);
 
 	return FALSE;
+}
+
+
+void CFSEAppLauncherWindowsDlg::CreateButtons() {
+	// 确保之前创建的按钮被删除
+	for (auto btn : m_buttons) {
+		if (btn) {
+			btn->DestroyWindow();
+		}
+	}
+	m_buttons.clear();
+
+	// 循环创建每个按钮
+	for (int i = 0; i < NUM_BUTTONS; ++i) {
+		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i], IsDarkMode());
+		if (!pBtn->Create(NULL, WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
+		                  CRect(0, 0, 0, 0), this, IDC_LAUNCHER_BTN_BASE + i)) {
+			delete pBtn;
+			continue;
+		}
+		// 设置工具提示
+		pBtn->SetTooltip(g_ButtonInfos[i].tooltip);
+		// 保存指针
+		m_buttons.push_back(pBtn);
+	}
+
+	// 初始布局
+	UpdateButtonLayout();
+}
+
+
+void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
+	if (m_buttons.empty()) {
+		return;
+	}
+
+	int iDpi = GetDpiForWindow(GetSafeHwnd());
+
+	// 按钮尺寸：40 epx
+	int btnWidth = MulDiv(40, iDpi, USER_DEFAULT_SCREEN_DPI);
+	int btnHeight = btnWidth;  // 正方形
+
+	// 按钮之间的间距
+	int spacing = MulDiv(4, iDpi, USER_DEFAULT_SCREEN_DPI);
+
+	// 右边距 = GetCalculatedMarginForDpi(Right)
+	int rightMargin = GetCalculatedMarginForDpi(Right);
+	// 上边距 = 标题上边距 (MulDiv(m_titlePaddingTop, iDpi,
+	// USER_DEFAULT_SCREEN_DPI))
+	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
+
+	CRect clientRect;
+	GetClientRect(&clientRect);
+
+	// 从右向左布局
+	int x = clientRect.right - rightMargin - btnWidth;
+	int y = topMargin;  // 上边距与标题对齐
+
+	for (size_t i = 0; i < m_buttons.size(); ++i) {
+		CLauncherButton* pBtn = m_buttons[i];
+		pBtn->SetDpi(iDpi);
+		pBtn->SetWindowPos(NULL, x, y, btnWidth, btnHeight,
+		                   SWP_NOZORDER | SWP_NOACTIVATE);
+		x -= (btnWidth + spacing);
+	}
 }
 
 

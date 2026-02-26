@@ -10,5 +10,6 @@
 // 添加要在此处预编译的标头
 #include "framework.h"
 #include <propkey.h>
+#include <vector>
 
 #endif //PCH_H

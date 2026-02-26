@@ -5,6 +5,9 @@
 #pragma once
 
 
+#include "LauncherButton.h"
+
+
 #ifndef DWMWA_USE_HOSTBACKDROPBRUSH
 #define DWMWA_USE_HOSTBACKDROPBRUSH 17
 #endif
@@ -24,6 +27,7 @@
 #ifndef DWMWA_SYSTEMBACKDROP_TYPE
 #define DWMWA_SYSTEMBACKDROP_TYPE 38
 #endif
+
 
 typedef BOOL(WINAPI* AllowDarkModeForWindowProc)(HWND, BOOL);
 typedef void(WINAPI* RefreshImmersiveColorPolicyStateProc)();
@@ -46,31 +50,37 @@ private:
 	const INT m_ncPaddingTopIncrement = 64;
 	const INT m_titlePaddingTop = 46;
 	const INT m_titleRectHeight = 40;
+
 	IExplorerBrowser* m_pExplorerBrowser = NULL;
+
+	std::vector<CLauncherButton*> m_buttons;           // 按钮数组
+	void CreateButtons();                              // 创建按钮
+	void UpdateButtonLayout();                         // 更新按钮位置（DPI 变化时调用）
+
 	void ApplyDarkModeSettings(HWND hWnd);
- BOOL CheckActiveWindow();
+	BOOL CheckActiveWindow();
 	BOOL CreateExplorerBrowser();
 	void DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();
 	INT GetCalculatedMarginForDpi(INT marginOrientation) const;
 	CRect NewRectForExplorerBrowser();
-	BOOL IsDarkMode() const;
 	void PaintTitle(CPaintDC* pDC);
 	void SetGroupingByName();
 
 // 构造
 public:
-	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);	// 标准构造函数
-	virtual ~CFSEAppLauncherWindowsDlg();	// 添加析构函数
+	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);  // 标准构造函数
+	virtual ~CFSEAppLauncherWindowsDlg();                // 添加析构函数
+
+	BOOL IsDarkMode() const;
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_FSEAPPLAUNCHERWINDOWS_DIALOG };
 #endif
 
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
-
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);  // DDX/DDV 支持
 
 // 实现
 protected:
@@ -80,9 +90,11 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void OnDestroy();
 	virtual void OnOK();
-	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam) override;
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam,
+	                           LPARAM lParam) override;
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
