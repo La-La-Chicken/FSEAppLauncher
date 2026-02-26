@@ -54,7 +54,7 @@ private:
 	BOOL m_bDarkMode;
 
 	// 绘制按钮（带透明度）
-	void DrawButton(CDC* pDC);
+	//void DrawButton(CDC* pDC);
 	// 获取图标文本绘制矩形（用于计算文本区域设置 Alpha）
 	// CRect GetIconRect(CDC* pDC);
 	// Helper function.

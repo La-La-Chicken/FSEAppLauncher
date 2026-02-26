@@ -46,7 +46,52 @@ void CLauncherButton::SetDpi(int iDpi) {
 
 void CLauncherButton::OnPaint() {
 	CPaintDC dc(this);
-	DrawButton(&dc);
+	CRect rect;
+	GetClientRect(&rect);
+	int cx = rect.Width();
+	int cy = rect.Height();
+
+	// 创建内存 DC 和 32 位 DIB
+	CDC memDC;
+	memDC.CreateCompatibleDC(&dc);
+	BITMAPINFO bmi = {0};
+	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmi.bmiHeader.biWidth = cx;
+	bmi.bmiHeader.biHeight = -cy;  // 自上而下
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32;
+	bmi.bmiHeader.biCompression = BI_RGB;
+
+	VOID* bits;
+	HBITMAP hBitmap = CreateDIBSection(dc.GetSafeHdc(),
+	                                   &bmi,
+	                                   DIB_RGB_COLORS,
+	                                   &bits,
+	                                   NULL,
+	                                   0);
+	if (!hBitmap) {
+		return;
+	}
+	CBitmap* pOldBmp = CBitmap::FromHandle((HBITMAP)memDC.SelectObject(hBitmap));
+
+	// 让按钮自己绘制到内存 DC（包括客户区、非客户区和背景）
+	SendMessage(WM_PRINTCLIENT, (WPARAM)memDC.GetSafeHdc(),
+	            PRF_CLIENT | PRF_ERASEBKGND | PRF_NONCLIENT);
+
+	// 设置每个像素的 Alpha 通道为 255（不透明）
+	// 注意：原生绘制可能不会自动设置 Alpha，此处强制覆盖
+	DWORD* pPixel = (DWORD*)bits;
+	for (int i = 0; i < cx * cy; ++i) {
+		pPixel[i] |= 0xFF000000;
+	}
+
+	// 将内存 DC 内容输出到屏幕，使用 AlphaBlend 以支持透明通道
+	BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+	AlphaBlend(dc.GetSafeHdc(), rect.left, rect.top, cx, cy, memDC.GetSafeHdc(),
+	           0, 0, cx, cy, bf);
+
+	memDC.SelectObject(pOldBmp);
+	DeleteObject(hBitmap);
 }
 
 
@@ -91,82 +136,48 @@ void CLauncherButton::OnPaint() {
 
 
 
-void CLauncherButton::DrawButton(CDC* pDC) {
-  CRect rect;
-  GetClientRect(&rect);
-  int cx = rect.Width();
-  int cy = rect.Height();
-
-  COLORREF bgColor = m_bDarkMode ? RGB(45, 45, 45) : RGB(251, 251, 251);
-  COLORREF textColor = m_bDarkMode ? RGB(255, 255, 255) : RGB(26, 26, 26);
-
-  // 创建内存 DC 和 32 位 DIB
-  CDC memDC;
-  memDC.CreateCompatibleDC(pDC);
-  BITMAPINFO bmi = {0};
-  bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-  bmi.bmiHeader.biWidth = cx;
-  bmi.bmiHeader.biHeight = -cy;  // 自上而下
-  bmi.bmiHeader.biPlanes = 1;
-  bmi.bmiHeader.biBitCount = 32;
-  bmi.bmiHeader.biCompression = BI_RGB;
-
-  LPVOID bits;
-  HBITMAP hBitmap =
-      CreateDIBSection(pDC->GetSafeHdc(), &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
-  if (!hBitmap) return;
-
-  HBITMAP hOldBmp = (HBITMAP)memDC.SelectObject(hBitmap);
-
-  // 1. 填充背景色
-  memDC.FillSolidRect(rect, bgColor);
-
-  // 2. 绘制图标文本
-  CFont font;
-  LOGFONT lf = {0};
-  lf.lfHeight = -MulDiv(20, m_iDpi, USER_DEFAULT_SCREEN_DPI);
-  //lf.lfWeight = FW_SEMIBOLD;
-  wcscpy_s(lf.lfFaceName, L"Segoe Fluent Icons");
-  font.CreateFontIndirect(&lf);
-  CFont* pOldFont = memDC.SelectObject(&font);
-
-  memDC.SetBkMode(TRANSPARENT);
-  memDC.SetTextColor(textColor);
-  memDC.DrawText(m_info.iconChar, &rect,
-                 DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-
-  // 3. 计算文本实际占用矩形
-  CSize textSize = memDC.GetTextExtent(m_info.iconChar);
-  CRect iconRect(CPoint((cx - textSize.cx) / 2, (cy - textSize.cy) / 2),
-                 textSize);
-  iconRect &= rect;  // 确保在客户区内
-
-  // 4. 手动设置每个像素的 Alpha 值
-  DWORD* pPixel = (DWORD*)bits;
-  for (int y = 0; y < cy; ++y) {
-    for (int x = 0; x < cx; ++x) {
-      int index = y * cx + x;
-      pPixel[index] |= 0xFF000000;  // 100%
-    }
-  }
-  // 设置文本区域 Alpha = 100
-  for (int y = iconRect.top; y < iconRect.bottom; ++y) {
-    for (int x = iconRect.left; x < iconRect.right; ++x) {
-      int index = y * cx + x;
-      pPixel[index] |= 0xFF000000;  // 100%
-    }
-  }
-
-  // 5. 将内存 DC 内容复制到屏幕，使用 AlphaBlend 支持透明度
-  BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
-  AlphaBlend(pDC->GetSafeHdc(), rect.left, rect.top, cx, cy, memDC.GetSafeHdc(),
-             0, 0, cx, cy, bf);
-
-  memDC.SelectObject(hOldBmp);
-  DeleteObject(hBitmap);
-}
-
-
+//void CLauncherButton::DrawButton(CDC* pDC) {
+//  CRect rect;
+//  GetClientRect(&rect);
+//  int cx = rect.Width();
+//  int cy = rect.Height();
+//
+//      // 创建内存 DC 和 32 位 DIB
+//    CDC memDC;
+//    memDC.CreateCompatibleDC(&dc);
+//    BITMAPINFO bmi = {0};
+//    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+//    bmi.bmiHeader.biWidth = cx;
+//    bmi.bmiHeader.biHeight = -cy;  // 自上而下
+//    bmi.bmiHeader.biPlanes = 1;
+//    bmi.bmiHeader.biBitCount = 32;
+//    bmi.bmiHeader.biCompression = BI_RGB;
+//
+//    LPVOID bits;
+//    HBITMAP hBitmap = CreateDIBSection(dc.GetSafeHdc(), &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
+//    if (!hBitmap) return;
+//    HBITMAP hOldBmp = (HBITMAP)memDC.SelectObject(hBitmap);
+//
+//    // 让按钮自己绘制到内存 DC（包括客户区、非客户区和背景）
+//    SendMessage(WM_PRINTCLIENT, (WPARAM)memDC.GetSafeHdc(), PRF_CLIENT | PRF_ERASEBKGND | PRF_NONCLIENT);
+//
+//    // 设置每个像素的 Alpha 通道为 255（不透明）
+//    // 注意：原生绘制可能不会自动设置 Alpha，此处强制覆盖
+//    DWORD* pPixel = (DWORD*)bits;
+//    for (int i = 0; i < cx * cy; ++i) {
+//        pPixel[i] |= 0xFF000000;
+//    }
+//
+//    // 将内存 DC 内容输出到屏幕，使用 AlphaBlend 以支持透明通道
+//    BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+//    AlphaBlend(dc.GetSafeHdc(), rect.left, rect.top, cx, cy,
+//               memDC.GetSafeHdc(), 0, 0, cx, cy, bf);
+//
+//    memDC.SelectObject(hOldBmp);
+//    DeleteObject(hBitmap);
+//}
+//
+//
 //CRect CLauncherButton::GetIconRect(CDC* pDC) {
 //  // 近似文本区域（可被 DrawButton 内部使用）
 //  return CRect();
