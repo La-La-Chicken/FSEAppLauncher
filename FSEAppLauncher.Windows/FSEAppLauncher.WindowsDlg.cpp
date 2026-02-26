@@ -317,21 +317,12 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 	                      &rgb,
 	                      sizeof(rgb));
 
-	IShellView3* pShellView3 = NULL;
-
-	HRESULT hr = m_pExplorerBrowser->GetCurrentView(IID_PPV_ARGS(&pShellView3));
-	if (FAILED(hr)) {
-		return;
+	// 强制所有按钮重绘
+	for (auto btn : m_buttons) {
+		if (btn) {
+			btn->Invalidate();
+		}
 	}
-
-	HWND hWndShellView;
-
-	hr = pShellView3->GetWindow(&hWndShellView);
-	if (FAILED(hr)) {
-		return;
-	}
-
-	SetWindowTheme(hWndShellView, L"DarkMode_Explorer", NULL);
 }
 
 
@@ -413,8 +404,10 @@ BOOL CFSEAppLauncherWindowsDlg::CheckActiveWindow() {
 
 		if (strProcessName.Find(L"CONSENT.EXE") < 0 &&
 		    strProcessName.Find(L"FSEAPPLAUNCHER.WINDOWS.EXE") < 0 &&
+						strProcessName.Find(L"MICROSOFT.CMDPAL.UI.EXE") < 0 &&
 		    strProcessName.Find(L"SHELLEXPERIENCEHOST.EXE") < 0 &&
-		    strProcessName.Find(L"SHELLHOST.EXE") < 0) {
+		    strProcessName.Find(L"SHELLHOST.EXE") < 0 &&
+		    strProcessName.Find(L"SLIDETOSHUTDOWN.EXE") < 0) {
 			CloseHandle(hProcess);
 			return TRUE;	// It is not a UAC dialog or a shell flyout
 		}
@@ -437,8 +430,9 @@ void CFSEAppLauncherWindowsDlg::CreateButtons() {
 	m_buttons.clear();
 
 	// 循环创建每个按钮
+	BOOL bDarkMode = IsDarkMode();
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
-		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i], IsDarkMode());
+		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i], bDarkMode);
 		if (!pBtn->Create(NULL, WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
 		                  CRect(0, 0, 0, 0), this, IDC_LAUNCHER_BTN_BASE + i)) {
 			delete pBtn;
@@ -471,8 +465,7 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 
 	// 右边距 = GetCalculatedMarginForDpi(Right)
 	int rightMargin = GetCalculatedMarginForDpi(Right);
-	// 上边距 = 标题上边距 (MulDiv(m_titlePaddingTop, iDpi,
-	// USER_DEFAULT_SCREEN_DPI))
+	// 上边距 = 标题上边距
 	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
 
 	CRect clientRect;
@@ -484,6 +477,9 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 
 	for (size_t i = 0; i < m_buttons.size(); ++i) {
 		CLauncherButton* pBtn = m_buttons[i];
+
+		BOOL bDarkMode = IsDarkMode();
+		pBtn->SetDarkMode(bDarkMode);
 		pBtn->SetDpi(iDpi);
 		pBtn->SetWindowPos(NULL, x, y, btnWidth, btnHeight,
 		                   SWP_NOZORDER | SWP_NOACTIVATE);

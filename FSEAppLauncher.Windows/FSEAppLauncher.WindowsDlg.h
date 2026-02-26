@@ -63,6 +63,7 @@ private:
 	void DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();
 	INT GetCalculatedMarginForDpi(INT marginOrientation) const;
+	BOOL IsDarkMode() const;
 	CRect NewRectForExplorerBrowser();
 	void PaintTitle(CPaintDC* pDC);
 	void SetGroupingByName();
@@ -71,8 +72,6 @@ private:
 public:
 	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);  // 标准构造函数
 	virtual ~CFSEAppLauncherWindowsDlg();                // 添加析构函数
-
-	BOOL IsDarkMode() const;
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
