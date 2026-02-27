@@ -9,10 +9,11 @@ enum class LaunchType { Browser, Exe, Folder, Uri };
 
 // 按钮信息结构体
 struct ButtonInfo {
-	const wchar_t* iconChar;  // Segoe Fluent Icons 字符
-	const wchar_t* tooltip;   // 工具提示
-	LaunchType     type;      // 启动类型
-	const wchar_t* target;    // 目标标识符 (AUMID/CLSID/路径/URI)
+	const TCHAR* iconChar;       // Segoe Fluent Icons 字符
+	const TCHAR* tooltip;        // 工具提示
+	LaunchType    type;          // 启动类型
+	const CString target;        // 目标标识符 (AUMID/CLSID/路径/URI)
+	const CString errorMessage;  // Error message to show when failed to launch.
 };
 
 // 声明数组（定义在 .cpp 中）
@@ -44,5 +45,4 @@ private:
 	int m_iDpi = USER_DEFAULT_SCREEN_DPI;  // 当前 DPI
 
 	BOOL IsFileExists(const CString& fileName);
-	BOOL IsProtocolAssociated(const CString& protocol);
 };

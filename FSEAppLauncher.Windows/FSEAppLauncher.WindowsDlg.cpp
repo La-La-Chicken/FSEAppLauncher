@@ -177,6 +177,13 @@ void CFSEAppLauncherWindowsDlg::OnActivate(UINT nState, CWnd* pWndOther,
 	} else {
 		ExtendFrameIntoClientArea();
 	}
+
+	// 强制所有按钮重绘
+	for (auto btn : m_buttons) {
+		if (btn) {
+			btn->Invalidate();
+		}
+	}
 }
 
 
@@ -317,13 +324,6 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 	                      DWMWA_TEXT_COLOR,
 	                      &rgb,
 	                      sizeof(rgb));
-
-	// 强制所有按钮重绘
-	//for (auto btn : m_buttons) {
-	//	if (btn) {
-	//		btn->Invalidate();
-	//	}
-	//}
 }
 
 
@@ -362,9 +362,9 @@ void CFSEAppLauncherWindowsDlg::ApplyDarkModeSettings(HWND hWnd) {
 	// 刷新颜色策略并允许窗口深色模式
 	auto RefreshImmersiveColorPolicyState =
 			(RefreshImmersiveColorPolicyStateProc)GetProcAddress(
-					hUxtheme, MAKEINTRESOURCEA(104));
+				hUxtheme, MAKEINTRESOURCEA(104));
 	auto AllowDarkModeForWindow = (AllowDarkModeForWindowProc)GetProcAddress(
-			hUxtheme, MAKEINTRESOURCEA(133));
+		hUxtheme, MAKEINTRESOURCEA(133));
 
 	if (RefreshImmersiveColorPolicyState) {
 		RefreshImmersiveColorPolicyState();
@@ -482,32 +482,36 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 
-	// 按钮尺寸：40 epx
-	int btnWidth = MulDiv(40, iDpi, USER_DEFAULT_SCREEN_DPI);
+	// 按钮尺寸: 40 epx + 2 px padding
+	int btnWidth = MulDiv(40, iDpi, USER_DEFAULT_SCREEN_DPI) + 2;
 	int btnHeight = btnWidth;  // 正方形
 
-	// 按钮之间的间距
-	int spacing = MulDiv(4, iDpi, USER_DEFAULT_SCREEN_DPI);
+	// 按钮之间的间距: 4 epx - 2 px padding
+	int spacing = MulDiv(4, iDpi, USER_DEFAULT_SCREEN_DPI) - 2;
 
-	// 右边距 = GetCalculatedMarginForDpi(Right)
-	int rightMargin = GetCalculatedMarginForDpi(Right);
-	// 上边距 = 标题上边距
-	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
+	// 右边距 = GetCalculatedMarginForDpi(Right) - 1 px padding
+	int rightMargin = GetCalculatedMarginForDpi(Right) - 1;
+	// 上边距 = 标题上边距 - 1 px padding
+	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI) - 1;
 
 	CRect clientRect;
 	GetClientRect(&clientRect);
 
 	// 从右向左布局
 	int x = clientRect.right - rightMargin - btnWidth;
-	int y = topMargin;  // 上边距与标题对齐
+	int y = clientRect.top + topMargin;
 
 	for (size_t i = 0; i < m_buttons.size(); ++i) {
 		CLauncherButton* pBtn = m_buttons[i];
 
 		pBtn->SetDpi(iDpi);
-		pBtn->SetWindowPos(NULL, x, y, btnWidth, btnHeight,
+		pBtn->SetWindowPos(NULL,
+		                   x,
+		                   y,
+		                   btnWidth,
+		                   btnHeight,
 		                   SWP_NOZORDER | SWP_NOACTIVATE);
-		x -= (btnWidth + spacing);
+		x -= spacing + btnWidth;
 	}
 }
 

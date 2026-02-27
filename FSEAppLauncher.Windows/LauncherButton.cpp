@@ -12,13 +12,26 @@ END_MESSAGE_MAP()
 
 // 预定义所有按钮（可按需增删） (Right-to-left)
 const ButtonInfo g_ButtonInfos[] = {
-	{L"\uE7E8", L"Power", LaunchType::Exe, L"SlideToShutDown.exe"},
-	{L"\uE713", L"Settings", LaunchType::Uri, L"ms-settings:"},
-	{L"\uE945", L"Command Palette", LaunchType::Uri, L"x-cmdpal:"},
-	{L"\uE774", L"Browser", LaunchType::Browser, L""},
-	{L"\uEC25", L"Personal folder", LaunchType::Folder,
-	 L"::{59031a47-3f72-44a7-89c5-5595fe6b30ee}"},
-	{L"\uE7FC", L"Xbox", LaunchType::Uri, L"msgamingapp:"}};
+	{_T("\uE7E8"), _T("Power"), LaunchType::Exe, CString(_T("SlideToShutDown.exe")),
+	 CString(_T("Switch to desktop and use the Start menu to perform power operations."))},
+
+	{_T("\uE713"), _T("Settings"), LaunchType::Uri, CString(_T("ms-settings:")),
+	 CString(_T("Switch to desktop and use the Start menu to launch Settings."))},
+
+	{_T("\uE945"), _T("Command Palette"), LaunchType::Uri, CString(_T("x-cmdpal:")),
+	 CString(_T("The latest version of PowerToys is required to launch Command palette. Download link:\n")
+	         _T("https://github.com/microsoft/PowerToys/releases/latest"))},
+
+	{_T("\uE774"), _T("Browser"), LaunchType::Browser, CString(_T("https://")),
+	 CString(_T("Switch to desktop and use the Start menu to launch a browser."))},
+
+	{_T("\uEC25"), _T("Personal folder"), LaunchType::Folder,
+	 CString(_T("::{59031a47-3f72-44a7-89c5-5595fe6b30ee}")),
+	 CString(_T("Switch to desktop and use the Start menu to launch File Explorer."))},
+
+	{_T("\uE7FC"), _T("Xbox"), LaunchType::Uri, CString(_T("msgamingapp:")),
+	 CString(_T("The latest version of Xbox app is required. Download link:\n")
+	         _T("https://apps.microsoft.com/detail/9MV0B5HZVK9Z"))}};
 
 const int NUM_BUTTONS = sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
 
@@ -93,42 +106,34 @@ void CLauncherButton::OnPaint() {
 
 
 void CLauncherButton::Launch() {
-	CString strTarget(m_info.target);
 	SHELLEXECUTEINFO sei = { sizeof(sei) };
 	sei.nShow = SW_SHOWNORMAL;
-	// sei.fMask = SEE_MASK_FLAG_NO_UI;	// 避免系统弹出错误 UI，由我们自己处理
 
 	switch (m_info.type) {
 	case LaunchType::Browser:
+		// Don't check whether the protocol is associated.
 		sei.lpVerb = L"open";
 		sei.lpFile = L"https://";  // 打开默认浏览器
 		break;
 
 	case LaunchType::Exe:
-		if (!IsFileExists(strTarget)) {
-			AfxMessageBox(CString(L"Error: Cannot find ") + strTarget);
+		if (!IsFileExists(m_info.target)) {
+			AfxMessageBox(m_info.errorMessage);
 			return;
 		}
 		sei.lpVerb = L"open";
-		sei.lpFile = strTarget;
+		sei.lpFile = m_info.target;
 		break;
 
 	case LaunchType::Folder:
 		sei.lpVerb = L"open";
 		sei.lpFile = L"explorer.exe";
-		sei.lpParameters = strTarget;
+		sei.lpParameters = m_info.target;
 		break;
 
 	case LaunchType::Uri:
-		// 检查 URI 协议是否有关联应用
-		//if (!IsProtocolAssociated(strTarget)) {
-		//	AfxMessageBox(
-		//		CString(L"Error: No application is associated with the protocol ") + strTarget);
-		//	return;
-		//}
 		sei.lpVerb = L"open";
-		sei.lpFile = strTarget;  // 直接使用 URI，如 "msgamingapp:"
-		break;
+		sei.lpFile = m_info.target;  // 直接使用 URI，如 "msgamingapp:"
 	}
 
 	if (!ShellExecuteEx(&sei)) {
@@ -151,35 +156,4 @@ BOOL CLauncherButton::IsFileExists(const CString& fileName) {
 	}
 
 	return GetFileAttributes(fileName) != INVALID_FILE_ATTRIBUTES;
-}
-
-
-// 检查 URI 协议是否有默认处理程序
-BOOL CLauncherButton::IsProtocolAssociated(const CString& protocol) {
-	// 移除末尾的冒号，因为 AssocQueryString 期望如 "http" 这样的协议名
-	CString scheme = protocol;
-	if (scheme.Right(1) == L":") {
-		scheme = scheme.Left(scheme.GetLength() - 1);
-	}
-
-	DWORD dwLen = 0;
-	// 查询关联的可执行文件
-	HRESULT hr = AssocQueryString(ASSOCF_INIT_IGNOREUNKNOWN,
-	                              ASSOCSTR_EXECUTABLE,
-	                              protocol,
-	                              L"open",
-	                              NULL,
-	                              &dwLen);
-	// 如果返回 ERROR_NO_ASSOCIATION，表示无关联
-	if (hr == HRESULT_FROM_WIN32(ERROR_NO_ASSOCIATION)) {
-		return FALSE;
-	}
-
-	// S_FALSE 且 dwLen > 0 表示存在默认程序
-	if (hr == S_FALSE && dwLen > 0) {
-		return TRUE;
-	}
-
-	// 其他情况（成功找到可执行文件或未知错误），保守返回 false
-	return SUCCEEDED(hr);
 }
