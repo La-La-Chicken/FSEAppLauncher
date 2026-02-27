@@ -328,7 +328,7 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 
 
 void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
-	if (!(IsZoomed() || IsIconic())) {
+	if (nType == SIZE_RESTORED) {
 		ShowWindow(SW_SHOWMAXIMIZED);
 		return;
 	}
