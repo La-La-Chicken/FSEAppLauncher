@@ -77,6 +77,9 @@ BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 		return FALSE;
 	}
 
+	// 创建图标字体（初始 DPI 为系统 DPI）
+	UpdateIconFont();
+
 	CreateButtons();  // 创建按钮
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -233,22 +236,14 @@ HBRUSH CFSEAppLauncherWindowsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd,
                                              UINT nCtlColor) {
 	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if (IsDarkMode()) {
-		// App mode: Dark
-		if (nCtlColor == CTLCOLOR_STATIC) {
-			pDC->SetBkColor(RGB(32, 32, 32));	// Solid Background / Base
-			pDC->SetTextColor(RGB(255, 255, 255));	// Text / Primary
-		}
-		return CreateSolidBrush(RGB(32, 32, 32));	// Solid Background / Base
-	}
+	BOOL bDarkMode = IsDarkMode();
 
-	// App mode: Light
 	if (nCtlColor == CTLCOLOR_STATIC) {
-		pDC->SetBkColor(RGB(243, 243, 243));	// Solid Background / Base
-		pDC->SetTextColor(RGB(26, 26, 26));	// Text / Primary
+		pDC->SetBkColor(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));	// Solid Background / Base
+		pDC->SetTextColor(bDarkMode ? RGB(255, 255, 255) : RGB(26, 26, 26));	// Text / Primary
 	}
 
-	return CreateSolidBrush(RGB(243, 243, 243));	// Solid Background / Base
+	return CreateSolidBrush(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));	// Solid Background / Base
 }
 
 
@@ -260,6 +255,12 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 	// Call this function to correctly redraw the window when minimized
 	if (m_pExplorerBrowser) {
 		m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
+	}
+
+	// 更新图标字体
+	UpdateIconFont();
+	for (auto btn : m_buttons) {
+		if (btn) btn->SetFont(&m_fntIcon);
 	}
 
 	UpdateButtonLayout();  // 更新按钮布局
@@ -420,8 +421,28 @@ BOOL CFSEAppLauncherWindowsDlg::CheckActiveWindow() {
 }
 
 
+// 新增：更新图标字体
+void CFSEAppLauncherWindowsDlg::UpdateIconFont() {
+	if (m_fntIcon.GetSafeHandle()) {
+		m_fntIcon.DeleteObject();
+	}
+
+	int iDpi = GetDpiForWindow(GetSafeHwnd());
+	LOGFONT lf = {};
+	lf.lfHeight = -MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);
+	lf.lfWeight = FW_MEDIUM;
+	wcscpy_s(lf.lfFaceName, L"Segoe Fluent Icons");
+	BOOL bCreated = m_fntIcon.CreateFontIndirect(&lf);
+
+	if (!bCreated) {
+		AfxMessageBox(_T("Notice: App Launcher only supports Windows 11."));
+	}
+}
+
+
+// 修改 CreateButtons：为每个按钮设置字体
 void CFSEAppLauncherWindowsDlg::CreateButtons() {
-	// 确保之前创建的按钮被删除
+	// 清理旧按钮
 	for (auto btn : m_buttons) {
 		if (btn) {
 			btn->DestroyWindow();
@@ -429,17 +450,21 @@ void CFSEAppLauncherWindowsDlg::CreateButtons() {
 	}
 	m_buttons.clear();
 
-	// 循环创建每个按钮
-	BOOL bDarkMode = IsDarkMode();
+	// 创建新按钮（注意构造函数不再需要 bDarkMode）
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
-		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i], bDarkMode);
-		if (!pBtn->Create(NULL, WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
-		                  CRect(0, 0, 0, 0), this, IDC_LAUNCHER_BTN_BASE + i)) {
+		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i]);
+		if (!pBtn->Create(g_ButtonInfos[i].iconChar,
+		                  WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		                  CRect(0, 0, 0, 0),
+		                  this,
+		                  IDC_LAUNCHER_BTN_BASE + i)) {
 			delete pBtn;
 			continue;
 		}
 		// 设置工具提示
 		pBtn->SetTooltip(g_ButtonInfos[i].tooltip);
+		// 设置图标字体
+		pBtn->SetFont(&m_fntIcon);
 		// 保存指针
 		m_buttons.push_back(pBtn);
 	}
@@ -478,8 +503,6 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 	for (size_t i = 0; i < m_buttons.size(); ++i) {
 		CLauncherButton* pBtn = m_buttons[i];
 
-		BOOL bDarkMode = IsDarkMode();
-		pBtn->SetDarkMode(bDarkMode);
 		pBtn->SetDpi(iDpi);
 		pBtn->SetWindowPos(NULL, x, y, btnWidth, btnHeight,
 		                   SWP_NOZORDER | SWP_NOACTIVATE);
@@ -666,14 +689,14 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		dib.bmiHeader.biBitCount = 32;
 		dib.bmiHeader.biCompression = BI_RGB;
 
-		HBITMAP hbm = CreateDIBSection(pDC->m_hDC,
-		                               &dib,
-		                               DIB_RGB_COLORS,
-		                               NULL,
-		                               NULL,
-		                               0);
-		if (hbm) {
-			CBitmap* pBmOld = CBitmap::FromHandle((HBITMAP)pDCPaint.SelectObject(hbm));
+		CBitmap* bm = CBitmap::FromHandle(CreateDIBSection(pDC->m_hDC,
+		                                  &dib,
+		                                  DIB_RGB_COLORS,
+		                                  NULL,
+		                                  NULL,
+		                                  0));
+		if (bm) {
+			CBitmap* pBmOld = pDCPaint.SelectObject(bm);
 			int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 			// Setup the theme drawing options.
@@ -721,7 +744,7 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 			if (fontOld) {
 				pDCPaint.SelectObject(fontOld);
 			}
-			DeleteObject(hbm);
+			DeleteObject(HBITMAP(bm));
 		}
 	}
 	CloseThemeData(hTheme);

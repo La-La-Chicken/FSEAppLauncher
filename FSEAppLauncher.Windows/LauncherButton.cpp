@@ -7,9 +7,6 @@ IMPLEMENT_DYNAMIC(CLauncherButton, CMFCButton)
 
 BEGIN_MESSAGE_MAP(CLauncherButton, CMFCButton)
 	ON_WM_PAINT()
-	ON_WM_ERASEBKGND()
-	ON_WM_MOUSEMOVE()
-	ON_WM_MOUSELEAVE()
 END_MESSAGE_MAP()
 
 
@@ -26,17 +23,9 @@ const ButtonInfo g_ButtonInfos[] = {
 const int NUM_BUTTONS = sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
 
 
-CLauncherButton::CLauncherButton(const ButtonInfo& info, BOOL bDarkMode)
-	: m_info(info), m_bDarkMode(bDarkMode) {}
+CLauncherButton::CLauncherButton(const ButtonInfo& info)
+	: m_info(info) {}
 
-
-CLauncherButton::~CLauncherButton() {}
-
-
-
-void CLauncherButton::SetDarkMode(BOOL bDarkMode) {
-	m_bDarkMode = bDarkMode;
-}
 
 
 void CLauncherButton::SetDpi(int iDpi) {
@@ -51,13 +40,13 @@ void CLauncherButton::OnPaint() {
 	int cx = rect.Width();
 	int cy = rect.Height();
 
-	// 创建内存 DC 和 32 位 DIB
+	// DC 32 bit DIB
 	CDC memDC;
 	memDC.CreateCompatibleDC(&dc);
-	BITMAPINFO bmi = {0};
+	BITMAPINFO bmi = {};
 	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	bmi.bmiHeader.biWidth = cx;
-	bmi.bmiHeader.biHeight = -cy;  // 自上而下
+	bmi.bmiHeader.biHeight = -cy;
 	bmi.bmiHeader.biPlanes = 1;
 	bmi.bmiHeader.biBitCount = 32;
 	bmi.bmiHeader.biCompression = BI_RGB;
@@ -72,133 +61,53 @@ void CLauncherButton::OnPaint() {
 	if (!hBitmap) {
 		return;
 	}
-	CBitmap* pOldBmp = CBitmap::FromHandle((HBITMAP)memDC.SelectObject(hBitmap));
 
-	// 让按钮自己绘制到内存 DC（包括客户区、非客户区和背景）
+	CBitmap* pOldBmp =
+		CBitmap::FromHandle((HBITMAP)memDC.SelectObject(hBitmap));
+
 	SendMessage(WM_PRINTCLIENT, (WPARAM)memDC.GetSafeHdc(),
 	            PRF_CLIENT | PRF_ERASEBKGND | PRF_NONCLIENT);
 
-	// 设置每个像素的 Alpha 通道为 255（不透明）
-	// 注意：原生绘制可能不会自动设置 Alpha，此处强制覆盖
 	DWORD* pPixel = (DWORD*)bits;
 	for (int i = 0; i < cx * cy; ++i) {
 		pPixel[i] |= 0xFF000000;
 	}
 
-	// 将内存 DC 内容输出到屏幕，使用 AlphaBlend 以支持透明通道
 	BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
-	AlphaBlend(dc.GetSafeHdc(), rect.left, rect.top, cx, cy, memDC.GetSafeHdc(),
-	           0, 0, cx, cy, bf);
+
+	AlphaBlend(dc.GetSafeHdc(),
+	           rect.left,
+	           rect.top,
+	           cx,
+	           cy,
+	           memDC.GetSafeHdc(),
+	           0,
+	           0,
+	           cx,
+	           cy,
+	           bf);
 
 	memDC.SelectObject(pOldBmp);
 	DeleteObject(hBitmap);
 }
 
 
-//BOOL CLauncherButton::OnEraseBkgnd(CDC* pDC) {
-//	return TRUE;  // 禁止擦除背景，避免闪烁
-//}
-//
-//
-//void CLauncherButton::OnMouseMove(UINT nFlags, CPoint point) {
-//	if (!m_bHover) {
-//		m_bHover = TRUE;
-//		TRACKMOUSEEVENT tme = {sizeof(tme), TME_LEAVE, GetSafeHwnd(), 0};
-//		TrackMouseEvent(&tme);
-//		Invalidate();  // 可选：重绘以显示悬停效果
-//	}
-//
-//	CMFCButton::OnMouseMove(nFlags, point);
-//}
-//
-//
-//void CLauncherButton::OnMouseLeave() {
-//	m_bHover = FALSE;
-//	Invalidate();
-//	CMFCButton::OnMouseLeave();
-//}
-//
-//
-//LRESULT CLauncherButton::WindowProc(UINT message, WPARAM wParam,
-//                                    LPARAM lParam) {
-//	LRESULT lResult = CMFCButton::WindowProc(message, wParam, lParam);
-//	// 这些消息可能导致系统默认绘制覆盖，强制重绘
-//	switch (message) {
-//	case WM_SETFOCUS:
-//	case WM_KILLFOCUS:
-//	case WM_LBUTTONDOWN:
-//	case WM_LBUTTONUP:
-//		Invalidate();
-//	}
-//
-//	return lResult;
-//}
 
-
-
-//void CLauncherButton::DrawButton(CDC* pDC) {
-//  CRect rect;
-//  GetClientRect(&rect);
-//  int cx = rect.Width();
-//  int cy = rect.Height();
-//
-//      // 创建内存 DC 和 32 位 DIB
-//    CDC memDC;
-//    memDC.CreateCompatibleDC(&dc);
-//    BITMAPINFO bmi = {0};
-//    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-//    bmi.bmiHeader.biWidth = cx;
-//    bmi.bmiHeader.biHeight = -cy;  // 自上而下
-//    bmi.bmiHeader.biPlanes = 1;
-//    bmi.bmiHeader.biBitCount = 32;
-//    bmi.bmiHeader.biCompression = BI_RGB;
-//
-//    LPVOID bits;
-//    HBITMAP hBitmap = CreateDIBSection(dc.GetSafeHdc(), &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
-//    if (!hBitmap) return;
-//    HBITMAP hOldBmp = (HBITMAP)memDC.SelectObject(hBitmap);
-//
-//    // 让按钮自己绘制到内存 DC（包括客户区、非客户区和背景）
-//    SendMessage(WM_PRINTCLIENT, (WPARAM)memDC.GetSafeHdc(), PRF_CLIENT | PRF_ERASEBKGND | PRF_NONCLIENT);
-//
-//    // 设置每个像素的 Alpha 通道为 255（不透明）
-//    // 注意：原生绘制可能不会自动设置 Alpha，此处强制覆盖
-//    DWORD* pPixel = (DWORD*)bits;
-//    for (int i = 0; i < cx * cy; ++i) {
-//        pPixel[i] |= 0xFF000000;
-//    }
-//
-//    // 将内存 DC 内容输出到屏幕，使用 AlphaBlend 以支持透明通道
-//    BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
-//    AlphaBlend(dc.GetSafeHdc(), rect.left, rect.top, cx, cy,
-//               memDC.GetSafeHdc(), 0, 0, cx, cy, bf);
-//
-//    memDC.SelectObject(hOldBmp);
-//    DeleteObject(hBitmap);
-//}
-//
-//
-//CRect CLauncherButton::GetIconRect(CDC* pDC) {
-//  // 近似文本区域（可被 DrawButton 内部使用）
-//  return CRect();
-//}
-//
-//
 void CLauncherButton::Launch() {
 	CString strTarget(m_info.target);
-	SHELLEXECUTEINFO sei = {sizeof(sei)};
+	SHELLEXECUTEINFO sei = { sizeof(sei) };
 	sei.nShow = SW_SHOWNORMAL;
 	// sei.fMask = SEE_MASK_FLAG_NO_UI;	// 避免系统弹出错误 UI，由我们自己处理
 
 	switch (m_info.type) {
 	case LaunchType::Browser:
 		sei.lpVerb = L"open";
-		sei.lpFile = L"http://";  // 打开默认浏览器空白页
+		sei.lpFile = L"https://";  // 打开默认浏览器
 		break;
 
 	case LaunchType::Exe:
 		if (!IsFileExists(strTarget)) {
-			AfxMessageBox(CString(L"Cannot find ") + strTarget);
+			AfxMessageBox(CString(L"Error: Cannot find ") + strTarget);
 			return;
 		}
 		sei.lpVerb = L"open";
@@ -232,14 +141,6 @@ void CLauncherButton::Launch() {
 }
 
 
-//// 辅助函数：检查打包应用是否安装（需实现）
-//BOOL CLauncherButton::IsAppInstalled(const CString& aumid) {
-//	// 可使用 PackageManager 或 IApplicationActivationManager 相关 API
-//	// 此处简化为始终返回 true（实际项目需实现）
-//	return true;
-//}
-//
-//
 BOOL CLauncherButton::IsFileExists(const CString& fileName) {
 	// 如果文件名不包含路径，搜索系统路径
 	if (fileName.Find(L'\\') == -1 && fileName.Find(L'/') == -1) {
@@ -266,7 +167,7 @@ BOOL CLauncherButton::IsProtocolAssociated(const CString& protocol) {
 	// 查询关联的可执行文件
 	HRESULT hr = AssocQueryString(ASSOCF_INIT_IGNOREUNKNOWN,
 	                              ASSOCSTR_EXECUTABLE,
-	                              scheme,
+	                              protocol,
 	                              L"open",
 	                              NULL,
 	                              &dwLen);
@@ -283,20 +184,3 @@ BOOL CLauncherButton::IsProtocolAssociated(const CString& protocol) {
 	// 其他情况（成功找到可执行文件或未知错误），保守返回 false
 	return SUCCEEDED(hr);
 }
-//
-//
-//LRESULT CLauncherButton::WindowProc(UINT message, WPARAM wParam,
-//                                    LPARAM lParam) {
-//	LRESULT lResult = CMFCButton::WindowProc(message, wParam, lParam);
-//	// 当某些消息可能导致默认绘制覆盖时，强制重绘
-//	switch (message) {
-//	case WM_MOUSEMOVE:
-//	case WM_MOUSELEAVE:
-//	case WM_SETFOCUS:
-//	case WM_KILLFOCUS:
-//	case WM_LBUTTONDOWN:
-//	case WM_LBUTTONUP:
-//		Invalidate();
-//	}
-//	return lResult;
-//}

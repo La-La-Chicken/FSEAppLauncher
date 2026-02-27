@@ -51,11 +51,16 @@ private:
 	const INT m_titlePaddingTop = 46;
 	const INT m_titleRectHeight = 40;
 
+	CFont m_fntIcon;                          // 图标字体
+
 	IExplorerBrowser* m_pExplorerBrowser = NULL;
 
-	std::vector<CLauncherButton*> m_buttons;           // 按钮数组
-	void CreateButtons();                              // 创建按钮
-	void UpdateButtonLayout();                         // 更新按钮位置（DPI 变化时调用）
+	std::vector<CLauncherButton*> m_buttons;  // 按钮数组
+
+	void UpdateIconFont();  // 更新图标字体（DPI 变化时调用）
+
+	void CreateButtons();                     // 创建按钮
+	void UpdateButtonLayout();                // 更新按钮位置（DPI 变化时调用）
 
 	void ApplyDarkModeSettings(HWND hWnd);
 	BOOL CheckActiveWindow();
