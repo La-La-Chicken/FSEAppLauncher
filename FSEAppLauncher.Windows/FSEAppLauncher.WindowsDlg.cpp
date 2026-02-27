@@ -319,11 +319,11 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 	                      sizeof(rgb));
 
 	// 强制所有按钮重绘
-	for (auto btn : m_buttons) {
-		if (btn) {
-			btn->Invalidate();
-		}
-	}
+	//for (auto btn : m_buttons) {
+	//	if (btn) {
+	//		btn->Invalidate();
+	//	}
+	//}
 }
 
 
@@ -421,7 +421,7 @@ BOOL CFSEAppLauncherWindowsDlg::CheckActiveWindow() {
 }
 
 
-// 新增：更新图标字体
+// Update the font info of the icons.
 void CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 	if (m_fntIcon.GetSafeHandle()) {
 		m_fntIcon.DeleteObject();
@@ -430,12 +430,13 @@ void CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 	LOGFONT lf = {};
 	lf.lfHeight = -MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);
-	lf.lfWeight = FW_MEDIUM;
+	lf.lfWeight = 550;
 	wcscpy_s(lf.lfFaceName, L"Segoe Fluent Icons");
 	BOOL bCreated = m_fntIcon.CreateFontIndirect(&lf);
 
 	if (!bCreated) {
-		AfxMessageBox(_T("Notice: App Launcher only supports Windows 11."));
+		AfxMessageBox(_T("Error: App Launcher only supports Windows 11 full edition."));
+		EndDialog(IDCLOSE);
 	}
 }
 
@@ -689,14 +690,14 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		dib.bmiHeader.biBitCount = 32;
 		dib.bmiHeader.biCompression = BI_RGB;
 
-		CBitmap* bm = CBitmap::FromHandle(CreateDIBSection(pDC->m_hDC,
-		                                  &dib,
-		                                  DIB_RGB_COLORS,
-		                                  NULL,
-		                                  NULL,
-		                                  0));
-		if (bm) {
-			CBitmap* pBmOld = pDCPaint.SelectObject(bm);
+		CBitmap* pBm = CBitmap::FromHandle(CreateDIBSection(pDC->m_hDC,
+		                                                    &dib,
+		                                                    DIB_RGB_COLORS,
+		                                                    NULL,
+		                                                    NULL,
+		                                                    0));
+		if (pBm) {
+			CBitmap* pBmOld = pDCPaint.SelectObject(pBm);
 			int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 			// Setup the theme drawing options.
@@ -744,7 +745,7 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 			if (fontOld) {
 				pDCPaint.SelectObject(fontOld);
 			}
-			DeleteObject(HBITMAP(bm));
+			DeleteObject(HBITMAP(pBm));
 		}
 	}
 	CloseThemeData(hTheme);

@@ -52,18 +52,17 @@ void CLauncherButton::OnPaint() {
 	bmi.bmiHeader.biCompression = BI_RGB;
 
 	VOID* bits;
-	HBITMAP hBitmap = CreateDIBSection(dc.GetSafeHdc(),
-	                                   &bmi,
-	                                   DIB_RGB_COLORS,
-	                                   &bits,
-	                                   NULL,
-	                                   0);
-	if (!hBitmap) {
+	CBitmap* pBm = CBitmap::FromHandle(CreateDIBSection(dc.GetSafeHdc(),
+	                                                    &bmi,
+	                                                    DIB_RGB_COLORS,
+	                                                    &bits,
+	                                                    NULL,
+	                                                    0));
+	if (!pBm) {
 		return;
 	}
 
-	CBitmap* pOldBmp =
-		CBitmap::FromHandle((HBITMAP)memDC.SelectObject(hBitmap));
+	CBitmap* pOldBmp = memDC.SelectObject(pBm);
 
 	SendMessage(WM_PRINTCLIENT, (WPARAM)memDC.GetSafeHdc(),
 	            PRF_CLIENT | PRF_ERASEBKGND | PRF_NONCLIENT);
@@ -88,7 +87,7 @@ void CLauncherButton::OnPaint() {
 	           bf);
 
 	memDC.SelectObject(pOldBmp);
-	DeleteObject(hBitmap);
+	DeleteObject(HBITMAP(pBm));
 }
 
 
