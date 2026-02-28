@@ -138,7 +138,6 @@ BOOL CFSEAppLauncherWindowsDlg::OnCommand(WPARAM wParam, LPARAM lParam) {
 
 
 void CFSEAppLauncherWindowsDlg::OnDestroy() {
-	// 清理资源
 	DestroyExplorerBrowser();
 
 	CDialogEx::OnDestroy();
@@ -167,21 +166,21 @@ void CFSEAppLauncherWindowsDlg::OnActivate(UINT nState, CWnd* pWndOther,
                                            BOOL bMinimized) {
 	CDialogEx::OnActivate(nState, pWndOther, bMinimized);
 
-	// 当窗口失去焦点时
+	// If the window is inactive
 	if (nState == WA_INACTIVE) {
-		// If the active window is not a UAC dialog or a shell flyout,
-		//  immediately minimize the window of Simple App Launcher
-		if (CheckActiveWindow()) {
+		// If the active window is not definitely in the white list,
+		//  immediately minimize the window of App Launcher.
+		if (NeedMinimize()) {
 			ShowWindow(SW_MINIMIZE);
 		}
 	} else {
 		ExtendFrameIntoClientArea();
-	}
 
-	// 强制所有按钮重绘
-	for (auto btn : m_buttons) {
-		if (btn) {
-			btn->Invalidate();
+		// Redraw the icons of the buttons.
+		for (auto btn : m_buttons) {
+			if (btn) {
+				btn->Invalidate();
+			}
 		}
 	}
 }
@@ -198,7 +197,7 @@ int CFSEAppLauncherWindowsDlg::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	BOOL bTRUE = TRUE;
 	BOOL bDarkMode = IsDarkMode();
 	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
-	INT nValue = 2/* DWMWCP_ROUND *//* DWMSBT_MAINWINDOW */;
+	INT nValue = 2/* = DWMWCP_ROUND *//* = DWMSBT_MAINWINDOW */;
 
 	DwmSetWindowAttribute(GetSafeHwnd(),
 	                      DWMWA_DISALLOW_PEEK,
@@ -246,11 +245,14 @@ HBRUSH CFSEAppLauncherWindowsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd,
 	BOOL bDarkMode = IsDarkMode();
 
 	if (nCtlColor == CTLCOLOR_STATIC) {
-		pDC->SetBkColor(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));	// Solid Background / Base
-		pDC->SetTextColor(bDarkMode ? RGB(255, 255, 255) : RGB(26, 26, 26));	// Text / Primary
+		// Solid Background / Base
+		pDC->SetBkColor(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));
+		// Text / Primary
+		pDC->SetTextColor(bDarkMode ? RGB(255, 255, 255) : RGB(26, 26, 26));
 	}
 
-	return CreateSolidBrush(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));	// Solid Background / Base
+	// Solid Background / Base
+	return CreateSolidBrush(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));
 }
 
 
@@ -264,13 +266,16 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 		m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
 	}
 
-	// 更新图标字体
+	// Update the font of icons.
 	UpdateIconFont();
 	for (auto btn : m_buttons) {
-		if (btn) btn->SetFont(&m_fntIcon);
+		if (btn) {
+			btn->SetFont(&m_fntIcon);
+		}
 	}
 
-	UpdateButtonLayout();  // 更新按钮布局
+	// Update the layout of buttons.
+	UpdateButtonLayout();
 
 	return 0;
 }
@@ -377,26 +382,26 @@ void CFSEAppLauncherWindowsDlg::ApplyDarkModeSettings(HWND hWnd) {
 }
 
 
-// Check that the activated window is definitely not a UAC dialog or a shell flyout
-BOOL CFSEAppLauncherWindowsDlg::CheckActiveWindow() {
+// Check that the activated window is not definitely in the whitelist.
+BOOL CFSEAppLauncherWindowsDlg::NeedMinimize() {
 	CWnd* cWndForeground = GetForegroundWindow();
 	if (!cWndForeground) {
-		return FALSE;
+		return TRUE;
 	}
 
 	DWORD pid = NULL;
 	GetWindowThreadProcessId(cWndForeground->GetSafeHwnd(), &pid);
 	if (!pid) {
-		return FALSE;
+		return TRUE;
 	}
 
 	HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION,
 	                              FALSE, pid);
 	if (!hProcess) {
-		return FALSE;
+		return TRUE;
 	}
 
-	// Check that the process name does not match the specified string
+	// Check that the process name does not match the specified string.
 	WCHAR szExeName[MAXCHAR];
 	DWORD dwSize = MAXCHAR;
 	if (QueryFullProcessImageName(hProcess, 0, szExeName, &dwSize)) {
@@ -410,11 +415,11 @@ BOOL CFSEAppLauncherWindowsDlg::CheckActiveWindow() {
 		    strProcessName.Find(L"SHELLHOST.EXE") < 0 &&
 		    strProcessName.Find(L"SLIDETOSHUTDOWN.EXE") < 0) {
 			CloseHandle(hProcess);
-			return TRUE;	// It is not a UAC dialog or a shell flyout
+			return TRUE;	// It is not in the whitelist.
 		}
 	}
 
-	// It is a UAC dialog or a shell flyout
+	// It is in the whitelist.
 	CloseHandle(hProcess);
 
 	return FALSE;
@@ -505,12 +510,12 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 		CLauncherButton* pBtn = m_buttons[i];
 
 		pBtn->SetDpi(iDpi);
-		pBtn->SetWindowPos(NULL,
+		pBtn->SetWindowPos(&wndTop,	// Place the buttons at the top of the Z-order.
 		                   x,
 		                   y,
 		                   btnWidth,
 		                   btnHeight,
-		                   SWP_NOZORDER | SWP_NOACTIVATE);
+		                   SWP_NOACTIVATE);
 		x -= spacing + btnWidth;
 	}
 }

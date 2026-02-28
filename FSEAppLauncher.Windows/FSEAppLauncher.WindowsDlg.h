@@ -63,7 +63,7 @@ private:
 	void UpdateButtonLayout();                // 更新按钮位置（DPI 变化时调用）
 
 	void ApplyDarkModeSettings(HWND hWnd);
-	BOOL CheckActiveWindow();
+	BOOL NeedMinimize();
 	BOOL CreateExplorerBrowser();
 	void DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();

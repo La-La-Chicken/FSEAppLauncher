@@ -16,6 +16,7 @@
 - Supports **setting it as home app** on devices compatible with the **FSE**[^1] feature (see "System Requirements").
 - Supports launching **any** app (including non-game apps) **under FSE[^1]**, **eliminating the need to switch back and forth between FSE[^1] and desktop**.
 - Provides the **native right-click menu** based on Windows Shell, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as **a substitute to the all apps list of Start Menu**.
+- Provides a set of buttons for quick access to **commonly used features[^2]**.
 
 ## System Requirements
 
@@ -95,7 +96,7 @@
 
 - After installing the certificate and dependency, you can install the application by double clicking "FSEAppLauncher...x64.msix" and then click "Install".
 
-#### 5. Configure the application as the home app[^2]
+#### 5. Configure the application as the home app[^3]
 
 - Open System Settings, click "Gaming", then click "Full screen experience".
 - Beside "Choose home app", select "App Launcher for Windows", and enable "Enter full screen experience on startup".
@@ -112,12 +113,16 @@
 
 - Fixed the bug that the client area is black on elastic overscroll.
 
+#### Beta - Version 26.23.40080.0 (Mar 2026)
+
+- Added a set of buttons for quick access to commonly used features.
+- Now the App Launcher UI no longer covers the taskbar.
+
 ## Developing and debugging
 
 Use the toolchain to develop:
 
 - Windows 10, version 1607+
-
 - Microsoft Visual Studio 2017+
 	- C++ desktop development
 		- MSVC v141
@@ -142,5 +147,6 @@ This means unlicensed works, modifications, and larger works may be distributed 
 
 
 
-[^1]: Also known as "Xbox Handheld Mode".
-[^2]: If your operating system version is lower than Windows 11, version 25H2, or your device is not a gaming handheld, you may not see "Full screen experience", and some options may not appear.
+[^1]:Also known as "Xbox Handheld Mode".
+[^2]:The "Xbox" button requires the latest version of [Xbox app](https://apps.microsoft.com/detail/9MV0B5HZVK9Z). The "Command Palette" button requires the latest version of [PowerToys](https://github.com/microsoft/PowerToys/releases/latest).
+[^3]:If your operating system version is lower than Windows 11, version 25H2, or your device is not a gaming handheld, you may not see "Full screen experience", and some options may not appear.

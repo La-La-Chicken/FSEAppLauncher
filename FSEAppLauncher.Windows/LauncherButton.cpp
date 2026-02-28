@@ -10,7 +10,7 @@ BEGIN_MESSAGE_MAP(CLauncherButton, CMFCButton)
 END_MESSAGE_MAP()
 
 
-// 预定义所有按钮（可按需增删） (Right-to-left)
+// Define the buttons (Right-to-left)
 const ButtonInfo g_ButtonInfos[] = {
 	{_T("\uE7E8"), _T("Power"), LaunchType::Exe, CString(_T("SlideToShutDown.exe")),
 	 CString(_T("Switch to desktop and use the Start menu to perform power operations."))},
@@ -18,7 +18,7 @@ const ButtonInfo g_ButtonInfos[] = {
 	{_T("\uE713"), _T("Settings"), LaunchType::Uri, CString(_T("ms-settings:")),
 	 CString(_T("Switch to desktop and use the Start menu to launch Settings."))},
 
-	{_T("\uE945"), _T("Command Palette"), LaunchType::Uri, CString(_T("x-cmdpal:")),
+	{_T("\uE773"), _T("Command Palette (PowerToys)"), LaunchType::Uri, CString(_T("x-cmdpal:")),
 	 CString(_T("The latest version of PowerToys is required to launch Command palette. Download link:\n")
 	         _T("https://github.com/microsoft/PowerToys/releases/latest"))},
 
