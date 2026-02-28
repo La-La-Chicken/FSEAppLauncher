@@ -29,8 +29,6 @@ class CLauncherButton : public CMFCButton {
 public:
 	CLauncherButton(const ButtonInfo& info/*, BOOL bDarkMode*/);
 
-	// 设置 DPI 相关尺寸（由对话框在 DPI 变化时调用）
-	void SetDpi(int iDpi);
 	// 执行启动操作
 	void Launch();
 
@@ -42,7 +40,6 @@ protected:
 
 private:
 	ButtonInfo m_info;                     // 按钮信息
-	int m_iDpi = USER_DEFAULT_SCREEN_DPI;  // 当前 DPI
 
 	BOOL IsFileExists(const CString& fileName);
 };

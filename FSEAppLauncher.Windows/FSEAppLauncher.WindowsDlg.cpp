@@ -509,7 +509,6 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 	for (size_t i = 0; i < m_buttons.size(); ++i) {
 		CLauncherButton* pBtn = m_buttons[i];
 
-		pBtn->SetDpi(iDpi);
 		pBtn->SetWindowPos(&wndTop,	// Place the buttons at the top of the Z-order.
 		                   x,
 		                   y,

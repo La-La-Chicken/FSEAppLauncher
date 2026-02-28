@@ -41,11 +41,6 @@ CLauncherButton::CLauncherButton(const ButtonInfo& info)
 
 
 
-void CLauncherButton::SetDpi(int iDpi) {
-	m_iDpi = iDpi;
-}
-
-
 void CLauncherButton::OnPaint() {
 	CPaintDC dc(this);
 	CRect rect;
