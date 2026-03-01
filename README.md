@@ -22,7 +22,7 @@
 
 #### Minimum requirements
 
-- Windows 11, version 24H2+
+- Windows 11, version 22H2+
 
 #### Other requirements (if you intend to set the application as home app of full screen experience)
 
@@ -113,10 +113,12 @@
 
 - Fixed the bug that the client area is black on elastic overscroll.
 
-#### Beta - Version 26.23.40080.0 (Mar 2026)
+#### Beta - Version 26.30.1200.0 (Mar 2026)
 
 - Added a set of buttons for quick access to commonly used features.
 - Now the App Launcher UI no longer covers the taskbar.
+- Updated to Per-Monitor v2 DPI awareness mode to adapt to dynamic DPI changes.
+- Added support for Windows 11, version 22H2/23H2.
 
 ## Developing and debugging
 
@@ -129,7 +131,7 @@ Use the toolchain to develop:
 		- Windows 10 SDK (10.0.19041)
 		- C++ MFC development tools
 
-**Windows 11, version 24H2+ is required to run or debug the packaged application.**
+**Windows 11, version 22H2+ is required to run or debug the packaged application.**
 
 ## Contributing
 

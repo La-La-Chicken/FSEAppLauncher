@@ -105,7 +105,6 @@ protected:
 	afx_msg LRESULT OnDpiChangedMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnMove(int x, int y);
 	afx_msg LRESULT OnNcCalcSizeMessage(WPARAM wParam, LPARAM lParam);
-	afx_msg BOOL OnNcCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()

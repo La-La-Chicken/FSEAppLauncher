@@ -35,8 +35,19 @@ CFSEAppLauncherApp theApp;
 // CFSEAppLauncherApp 初始化
 
 BOOL CFSEAppLauncherApp::InitInstance() {
+	HRESULT hr =
+		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	if (!hr) {
+		CString strError;
+		strError.Format(
+			_T("Error: App Launcher only supports Windows 11. Error code: 0x%X"),
+			GetLastError());
+		AfxMessageBox(strError);
+		return FALSE;
+	}
+
 	if (FAILED(CoInitializeEx(
-					NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE))) {
+			NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE))) {
 		AfxMessageBox(_T("Error: Failed to initialize COM."));
 		return FALSE;
 	}

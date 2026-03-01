@@ -49,7 +49,6 @@ BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CDialogEx)
 	ON_MESSAGE(WM_DPICHANGED, &CFSEAppLauncherWindowsDlg::OnDpiChangedMessage)
 	ON_WM_MOVE()
 	ON_MESSAGE(WM_NCCALCSIZE, &CFSEAppLauncherWindowsDlg::OnNcCalcSizeMessage)
-	ON_WM_NCCREATE()
 	ON_WM_SETTINGCHANGE()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
@@ -258,13 +257,9 @@ HBRUSH CFSEAppLauncherWindowsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd,
 
 LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
                                                        LPARAM lParam) {
-	// Call this function to correctly redraw the window when not minimized
+	// Call this function to correctly redraw the window
+	//  when not minimized and not activated.
 	ExtendFrameIntoClientArea();
-
-	// Call this function to correctly redraw the window when minimized
-	if (m_pExplorerBrowser) {
-		m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
-	}
 
 	// Update the font of icons.
 	UpdateIconFont();
@@ -274,8 +269,9 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 		}
 	}
 
-	// Update the layout of buttons.
-	UpdateButtonLayout();
+	RedrawWindow(NULL,
+	             NULL,
+	             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 
 	return 0;
 }
@@ -298,13 +294,6 @@ LRESULT CFSEAppLauncherWindowsDlg::OnNcCalcSizeMessage(WPARAM wParam,
 	}
 
 	return Default();	// 否则调用默认处理（例如窗口最小化/最大化时的计算）
-}
-
-
-BOOL CFSEAppLauncherWindowsDlg::OnNcCreate(LPCREATESTRUCT lpCreateStruct) {
-	EnableNonClientDpiScaling(GetSafeHwnd());
-
-	return CDialogEx::OnNcCreate(lpCreateStruct);
 }
 
 
