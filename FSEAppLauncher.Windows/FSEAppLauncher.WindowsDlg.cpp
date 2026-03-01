@@ -307,7 +307,7 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 		return;
 	}
 
-	// Update the dark mode of the title bar
+	// Update the dark mode of the title bar.
 	BOOL bDarkMode = IsDarkMode();
 	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
 
@@ -319,6 +319,20 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 	                      DWMWA_TEXT_COLOR,
 	                      &rgb,
 	                      sizeof(rgb));
+
+	// Notify ExplorerBrowser to switch between light / dark mode
+	if (m_pExplorerBrowser) {
+		CComPtr<IShellView3> spShellView3;
+		if (SUCCEEDED(m_pExplorerBrowser->GetCurrentView(
+		     IID_PPV_ARGS(&spShellView3))) &&
+		    spShellView3) {
+			HWND hwndView = NULL;
+			if (SUCCEEDED(spShellView3->GetWindow(&hwndView)) && hwndView) {
+				// 向视图窗口发送 WM_SETTINGCHANGE 消息
+				::SendMessage(hwndView, WM_SETTINGCHANGE, uFlags, (LPARAM)lpszSection);
+			}
+		}
+	}
 
 	// Redraw the window to refresh the title when not minimized.
 	RedrawWindow(NULL, NULL,
