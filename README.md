@@ -14,8 +14,8 @@
 ## Highlights
 
 - Supports **setting it as home app** on devices compatible with the **FSE**[^1] feature (see "System Requirements").
-- Supports launching **any** app (including non-game apps) **under FSE[^1]**, **eliminating the need to switch back and forth between FSE[^1] and desktop**.
-- Provides the **native right-click menu** based on Windows Shell, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as **a substitute to the all apps list of Start Menu**.
+- Supports launching **any** app (including non-game apps) **under FSE[^1]**, eliminating the need to switch back and forth between FSE[^1] and desktop.
+- Provides the **native right-click menu** based on Windows Shell, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as a substitute to the all apps list of Start Menu.
 
 ## System Requirements
 
