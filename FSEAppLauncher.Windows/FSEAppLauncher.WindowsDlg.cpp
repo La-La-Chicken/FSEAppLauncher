@@ -269,6 +269,7 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 		}
 	}
 
+	// Redraw the window to refresh the title when not minimized.
 	RedrawWindow(NULL,
 	             NULL,
 	             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
@@ -318,6 +319,10 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 	                      DWMWA_TEXT_COLOR,
 	                      &rgb,
 	                      sizeof(rgb));
+
+	// Redraw the window to refresh the title when not minimized.
+	RedrawWindow(NULL, NULL,
+	             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 }
 
 
