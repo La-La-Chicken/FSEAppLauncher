@@ -322,19 +322,23 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 
 
 void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
-	if (nType == SIZE_RESTORED) {
+	switch (nType) {
+	case SIZE_MAXIMIZED:
+		CDialogEx::OnSize(nType, cx, cy);
+		// Resize ExplorerBrowser
+		if (m_pExplorerBrowser) {
+			m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
+		}
+		UpdateButtonLayout();
+		break;
+
+	case SIZE_RESTORED:
 		ShowWindow(SW_SHOWMAXIMIZED);
-		return;
+		break;
+
+	default:	// SIZE_MINIMIZED, SIZE_MAXHIDE, SIZE_MAXSHOW
+		CDialogEx::OnSize(nType, cx, cy);
 	}
-
-	CDialogEx::OnSize(nType, cx, cy);
-
-	// 调整 ExplorerBrowser 大小
-	if (m_pExplorerBrowser) {
-		m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
-	}
-
-	UpdateButtonLayout();
 }
 
 
