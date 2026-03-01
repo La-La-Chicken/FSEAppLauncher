@@ -10,7 +10,7 @@ BEGIN_MESSAGE_MAP(CLauncherButton, CMFCButton)
 END_MESSAGE_MAP()
 
 
-// Define the buttons (Right-to-left)
+// Define the buttons (right-to-left).
 const ButtonInfo g_ButtonInfos[] = {
 	{_T("\uE7E8"), _T("Power"), LaunchType::Exe, CString(_T("SlideToShutDown.exe")),
 	 CString(_T("Switch to desktop and use the Start menu to perform power operations."))},
@@ -108,7 +108,7 @@ void CLauncherButton::Launch() {
 	case LaunchType::Browser:
 		// Don't check whether the protocol is associated.
 		sei.lpVerb = L"open";
-		sei.lpFile = L"https://";  // 打开默认浏览器
+		sei.lpFile = L"https://";  // Open the default browser.
 		break;
 
 	case LaunchType::Exe:
@@ -128,7 +128,7 @@ void CLauncherButton::Launch() {
 
 	case LaunchType::Uri:
 		sei.lpVerb = L"open";
-		sei.lpFile = m_info.target;  // 直接使用 URI，如 "msgamingapp:"
+		sei.lpFile = m_info.target;
 	}
 
 	if (!ShellExecuteEx(&sei)) {

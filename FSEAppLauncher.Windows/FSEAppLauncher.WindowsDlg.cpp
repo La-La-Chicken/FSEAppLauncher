@@ -26,7 +26,6 @@ CFSEAppLauncherWindowsDlg::CFSEAppLauncherWindowsDlg(CWnd* pParent /*=nullptr*/)
 
 
 CFSEAppLauncherWindowsDlg::~CFSEAppLauncherWindowsDlg() {
-	// 确保资源被释放
 	if (m_pExplorerBrowser) {
 		m_pExplorerBrowser->Destroy();
 		m_pExplorerBrowser->Release();
@@ -72,14 +71,14 @@ BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 	pMenu->EnableMenuItem(SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
 	pMenu->EnableMenuItem(SC_MOVE, MF_BYCOMMAND | MF_GRAYED);
 
+	// Initialize ExplorerBrowser.
 	if (!CreateExplorerBrowser()) {
 		return FALSE;
 	}
 
-	// 创建图标字体（初始 DPI 为系统 DPI）
+	// Initialize the buttons.
 	UpdateIconFont();
-
-	CreateButtons();  // 创建按钮
+	CreateButtons();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 }
@@ -98,7 +97,7 @@ void CFSEAppLauncherWindowsDlg::OnPaint() {
 		int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 		// 使图标在工作区矩形中居中
-		// Replaced with Per-Monitor version
+		// Replaced with Per-Monitor version.
 		int cxIcon = GetSystemMetricsForDpi(SM_CXICON, iDpi);
 		int cyIcon = GetSystemMetricsForDpi(SM_CYICON, iDpi);
 		CRect rect;
@@ -150,13 +149,13 @@ void CFSEAppLauncherWindowsDlg::OnOK() {
 
 LRESULT CFSEAppLauncherWindowsDlg::WindowProc(UINT message, WPARAM wParam,
                                               LPARAM lParam) {
-	// 先让 DWM 尝试处理消息
+	// 先让 DWM 尝试处理消息.
 	LRESULT lResult = 0;
 	if (DwmDefWindowProc(GetSafeHwnd(), message, wParam, lParam, &lResult)) {
 		return lResult;
 	}
 
-	// DWM 未处理，调用基类默认处理
+	// DWM 未处理, 调用基类默认处理.
 	return CDialogEx::WindowProc(message, wParam, lParam);
 }
 
@@ -233,7 +232,7 @@ int CFSEAppLauncherWindowsDlg::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	             rect.Width(), rect.Height(),
 	             SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
 
-	return result;	// 返回 0 表示成功，-1 表示失败会销毁窗口
+	return result;	// 返回 0 表示成功，-1 表示失败会销毁窗口.
 }
 
 
@@ -320,7 +319,7 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 	                      &rgb,
 	                      sizeof(rgb));
 
-	// Notify ExplorerBrowser to switch between light / dark mode
+	// Notify ExplorerBrowser to switch between light / dark mode.
 	if (m_pExplorerBrowser) {
 		CComPtr<IShellView3> spShellView3;
 		if (SUCCEEDED(m_pExplorerBrowser->GetCurrentView(
@@ -328,7 +327,7 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 		    spShellView3) {
 			HWND hwndView = NULL;
 			if (SUCCEEDED(spShellView3->GetWindow(&hwndView)) && hwndView) {
-				// Send WM_SETTINGCHANGE to the HWND of spShellView3
+				// Send WM_SETTINGCHANGE to the HWND of spShellView3.
 				::SendMessage(hwndView, WM_SETTINGCHANGE, uFlags, (LPARAM)lpszSection);
 			}
 		}
@@ -344,7 +343,7 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 	switch (nType) {
 	case SIZE_MAXIMIZED:
 		CDialogEx::OnSize(nType, cx, cy);
-		// Resize ExplorerBrowser
+		// Resize ExplorerBrowser.
 		if (m_pExplorerBrowser) {
 			m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
 		}
@@ -369,14 +368,14 @@ void CFSEAppLauncherWindowsDlg::ApplyDarkModeSettings(HWND hWnd) {
 		return;
 	}
 
-	// Windows 10 1903 and above only
+	// Windows 10 1903 and above only.
 	auto SetPreferredAppMode = (SetPreferredAppModeProc)GetProcAddress(
 			hUxtheme, MAKEINTRESOURCEA(135));
 	if (SetPreferredAppMode) {
 		SetPreferredAppMode(AllowDark);
 	}
 
-	// 刷新颜色策略并允许窗口深色模式
+	// Refresh the color policy state and allow dark mode for the window.
 	auto RefreshImmersiveColorPolicyState =
 			(RefreshImmersiveColorPolicyStateProc)GetProcAddress(
 				hUxtheme, MAKEINTRESOURCEA(104));
@@ -458,9 +457,9 @@ void CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 }
 
 
-// 修改 CreateButtons：为每个按钮设置字体
+// Create the buttons.
 void CFSEAppLauncherWindowsDlg::CreateButtons() {
-	// 清理旧按钮
+	// Destroy old buttons.
 	for (auto btn : m_buttons) {
 		if (btn) {
 			btn->DestroyWindow();
@@ -468,7 +467,7 @@ void CFSEAppLauncherWindowsDlg::CreateButtons() {
 	}
 	m_buttons.clear();
 
-	// 创建新按钮（注意构造函数不再需要 bDarkMode）
+	// Create new buttons.
 	for (int i = 0; i < NUM_BUTTONS; ++i) {
 		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i]);
 		if (!pBtn->Create(g_ButtonInfos[i].iconChar,
@@ -479,15 +478,15 @@ void CFSEAppLauncherWindowsDlg::CreateButtons() {
 			delete pBtn;
 			continue;
 		}
-		// 设置工具提示
+		// Set the tooltip.
 		pBtn->SetTooltip(g_ButtonInfos[i].tooltip);
-		// 设置图标字体
+		// Set the font of icons.
 		pBtn->SetFont(&m_fntIcon);
-		// 保存指针
+		// Save the pointer.
 		m_buttons.push_back(pBtn);
 	}
 
-	// 初始布局
+	// Initialize the layout.
 	UpdateButtonLayout();
 }
 
@@ -499,29 +498,30 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 
-	// 按钮尺寸: 40 epx + 2 px padding
+	// Button: 40 epx + 2 px padding.
 	int btnWidth = MulDiv(40, iDpi, USER_DEFAULT_SCREEN_DPI) + 2;
-	int btnHeight = btnWidth;  // 正方形
+	int btnHeight = btnWidth;
 
-	// 按钮之间的间距: 4 epx - 2 px padding
+	// Margin: 4 epx - 2 px padding.
 	int spacing = MulDiv(4, iDpi, USER_DEFAULT_SCREEN_DPI) - 2;
 
-	// 右边距 = GetCalculatedMarginForDpi(Right) - 1 px padding
+	// Right margin of the button set: Right padding of the dialog - 1 px padding.
 	int rightMargin = GetCalculatedMarginForDpi(Right) - 1;
-	// 上边距 = 标题上边距 - 1 px padding
+	// Top margin of the button set: Top margin of the title - 1 px padding.
 	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI) - 1;
 
 	CRect clientRect;
 	GetClientRect(&clientRect);
 
-	// 从右向左布局
+	// Right-to-left layout.
 	int x = clientRect.right - rightMargin - btnWidth;
 	int y = clientRect.top + topMargin;
 
 	for (size_t i = 0; i < m_buttons.size(); ++i) {
 		CLauncherButton* pBtn = m_buttons[i];
 
-		pBtn->SetWindowPos(&wndTop,	// Place the buttons at the top of the Z-order.
+		// Place the buttons at the top of the Z-order.
+		pBtn->SetWindowPos(&wndTop,
 		                   x,
 		                   y,
 		                   btnWidth,
