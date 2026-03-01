@@ -113,7 +113,7 @@
 
 - Fixed the bug that the client area is black on elastic overscroll.
 
-#### Beta - Version 26.30.1200.0 (Mar 2026)
+#### Beta - Version 26.30.1200.0 (March 2026)
 
 - Added a set of buttons for quick access to commonly used features.
 - Now the App Launcher UI no longer covers the taskbar.

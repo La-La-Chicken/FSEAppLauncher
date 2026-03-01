@@ -328,7 +328,7 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 		    spShellView3) {
 			HWND hwndView = NULL;
 			if (SUCCEEDED(spShellView3->GetWindow(&hwndView)) && hwndView) {
-				// 向视图窗口发送 WM_SETTINGCHANGE 消息
+				// Send WM_SETTINGCHANGE to the HWND of spShellView3
 				::SendMessage(hwndView, WM_SETTINGCHANGE, uFlags, (LPARAM)lpszSection);
 			}
 		}
