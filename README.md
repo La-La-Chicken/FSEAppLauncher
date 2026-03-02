@@ -114,6 +114,7 @@
 
 - Added a set of buttons for quick access to commonly used features.
 - Now the App Launcher UI no longer covers the taskbar.
+- Fixed an issue where the App Launcher UI would not automatically hide after launching an app in some cases.
 - Updated to Per-Monitor v2 DPI awareness mode to adapt to dynamic DPI changes.
 - Adapted to dynamic light / dark mode changes.
 - Added backward compatibility for Windows 11, version 22H2 and 23H2.
