@@ -13,15 +13,17 @@
 
 ## Highlights
 
-- Supports **setting it as home app** on devices compatible with the **FSE**[^1] feature (see "System Requirements").
+- Supports **setting it as home app** on devices compatible with the **FSE[^1]** feature (see "System Requirements").
 - Supports launching **any** app (including non-game apps) **under FSE[^1]**, eliminating the need to switch back and forth between FSE[^1] and desktop.
-- Provides the **native right-click menu** based on Windows Shell, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as a substitute to the all apps list of Start Menu.
+- Provides the **native right-click menu**, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as a substitute to the all apps list of Start Menu.
+- **[New]** Provides a set of buttons for quick access to **commonly used features[^2]**.
+- **[New]** Provides native support for touch screen, high DPI, and dark mode.
 
 ## System Requirements
 
 #### Minimum requirements
 
-- Windows 11, version 24H2+
+- Windows 11, version 22H2+
 
 #### Other requirements (if you intend to set the application as home app of full screen experience)
 
@@ -95,7 +97,7 @@
 
 - After installing the certificate and dependency, you can install the application by double clicking "FSEAppLauncher...x64.msix" and then click "Install".
 
-#### 5. Configure the application as the home app[^2]
+#### 5. Configure the application as the home app[^3]
 
 - Open System Settings, click "Gaming", then click "Full screen experience".
 - Beside "Choose home app", select "App Launcher for Windows", and enable "Enter full screen experience on startup".
@@ -108,17 +110,14 @@
 
 ## What's new
 
-#### General Availability - Version 26.23.31455.0
-
-- Fixed the bug that the client area is black on elastic overscroll.
-
-#### Beta - Version 26.30.1440.0 (March 2026)
+#### Current - Version 26.30.1440.0 (March 2026)
 
 - Added a set of buttons for quick access to commonly used features.
 - Now the App Launcher UI no longer covers the taskbar.
 - Updated to Per-Monitor v2 DPI awareness mode to adapt to dynamic DPI changes.
 - Adapted to dynamic light / dark mode changes.
-- Added support for Windows 11, version 22H2/23H2.
+- Added backward compatibility for Windows 11, version 22H2 and 23H2.
+
 
 ## Developing and debugging
 
@@ -150,4 +149,5 @@ This means unlicensed works, modifications, and larger works may be distributed 
 
 
 [^1]:Also known as "Xbox Handheld Mode".
-[^2]:If your operating system version is lower than Windows 11, version 25H2, or your device is not a gaming handheld, you may not see "Full screen experience", and some options may not appear.
+[^2]:The "Xbox" feature requires the latest version of [Xbox app](https://apps.microsoft.com/detail/9MV0B5HZVK9Z). The "Command Palette" feature requires the latest version of [PowerToys](https://github.com/microsoft/PowerToys/releases/latest).
+[^3]:If your operating system version is lower than Windows 11, version 25H2, or your device is not a gaming handheld, you may not see "Full screen experience", and some options may not appear.
