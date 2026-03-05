@@ -5,14 +5,14 @@
 
 
 // 按钮启动类型
-enum class LaunchType { Browser, Exe, Folder, Uri };
+enum class LaunchType { Exe, KeyCombination, Uri };
 
 // 按钮信息结构体
 struct ButtonInfo {
 	const TCHAR* iconChar;       // Segoe Fluent Icons 字符
 	const TCHAR* tooltip;        // 工具提示
 	LaunchType    type;          // 启动类型
-	const CString target;        // 目标标识符 (AUMID/CLSID/路径/URI)
+	const CString target;        // 目标标识符 (AUMID/CLSID/directory/URI)
 	const CString errorMessage;  // Error message to show when failed to launch.
 };
 
@@ -42,4 +42,5 @@ private:
 	ButtonInfo m_info;                     // 按钮信息
 
 	BOOL IsFileExists(const CString& fileName);
+	void SendKeyCombination(const CString& keyCombination);
 };

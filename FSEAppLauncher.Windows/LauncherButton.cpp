@@ -10,28 +10,69 @@ BEGIN_MESSAGE_MAP(CLauncherButton, CMFCButton)
 END_MESSAGE_MAP()
 
 
+TCHAR keyCombinationForNotifications[] = {VK_LWIN, 'N'};
+TCHAR keyCombinationForQuickSettings[] = {VK_LWIN, 'A'};
+
 // Define the buttons (right-to-left).
 const ButtonInfo g_ButtonInfos[] = {
-	{_T("\uE7E8"), _T("Power"), LaunchType::Exe, CString(_T("SlideToShutDown.exe")),
+	{_T("\uE7E8"), _T("Shut down"), LaunchType::Exe,
+	 CString(_T("SlideToShutDown.exe")),
 	 CString(_T("Switch to desktop and use the Start menu to perform power operations."))},
 
-	{_T("\uE713"), _T("Settings"), LaunchType::Uri, CString(_T("ms-settings:")),
+	{_T("\uE713"), _T("Settings"), LaunchType::Uri,
+	 CString(_T("ms-settings:")),
 	 CString(_T("Switch to desktop and use the Start menu to launch Settings."))},
 
-	{_T("\uE773"), _T("Command Palette (PowerToys)"), LaunchType::Uri, CString(_T("x-cmdpal:")),
-	 CString(_T("The latest version of PowerToys is required to launch Command palette. Download link:\n")
-	         _T("https://github.com/microsoft/PowerToys/releases/latest"))},
+	{_T("\uE91C"), _T("Notifications"), LaunchType::KeyCombination,
+	 CString(keyCombinationForNotifications, sizeof(keyCombinationForNotifications) / sizeof(TCHAR)),
+	 CString(_T("Switch to desktop to use this feature."))},
 
-	{_T("\uE774"), _T("Browser"), LaunchType::Browser, CString(_T("https://")),
+	{_T("\uF8A6"), _T("Quick Settings"), LaunchType::KeyCombination,
+	 CString(keyCombinationForQuickSettings, sizeof(keyCombinationForQuickSettings) / sizeof(TCHAR)),
+	 CString(_T("Switch to desktop to use this feature."))},
+
+	{_T("\uE773"), _T("Command Palette (PowerToys)"), LaunchType::Uri,
+	 CString(_T("x-cmdpal:")),
+	 CString(_T("The latest version of PowerToys is required. Download link:\n")
+	         _T("https://apps.microsoft.com/detail/XP89DCGQ3K6VLD"))},
+
+	{_T("\uE719"), _T("Microsoft Store"), LaunchType::Uri,
+	 CString(_T("ms-windows-store:")),
+	 CString(_T("The latest version of Microsoft Store is required. Download link:\n")
+	         _T("https://apps.microsoft.com/detail/9WZDNCRFJBMP"))},
+
+	{_T("\uED66"), _T("GOG Galaxy"), LaunchType::Uri,
+	 CString(_T("goggalaxy:")),
+	 CString(_T("The latest version of GOG Galaxy is required. Download link:\n")
+	         _T("https://apps.microsoft.com/detail/XPFFXW40W60KCF"))},
+
+	{_T("\uE7FC"), _T("Epic Games Launcher"), LaunchType::Uri,
+	 CString(_T("com.epicgames.launcher:")),
+	 CString(_T("The latest version of Epic Games Launcher is required. Download link:\n")
+	         _T("https://apps.microsoft.com/detail/XP99VR1BPSBQJ2"))},
+
+	{_T("\uE7FC"), _T("Steam"), LaunchType::Uri,
+	 CString(_T("steam:")),
+	 CString(_T("The latest version of Steam is required. Download link:\n")
+	         _T("https://store.steampowered.com/about/"))},
+
+	{_T("\uE7FC"), _T("EA"), LaunchType::Uri,
+	 CString(_T("origin2:")),
+	 CString(_T("The latest version of EA app is required. Download link:\n")
+	         _T("https://www.ea.com/ea-app#downloads"))},
+
+	{_T("\uE7FC"), _T("Xbox"), LaunchType::Uri,
+	 CString(_T("msgamingapp:")),
+	 CString(_T("The latest version of Xbox app is required. Download link:\n")
+	         _T("https://apps.microsoft.com/detail/9MV0B5HZVK9Z"))},
+
+	{_T("\uE774"), _T("Browser"), LaunchType::Uri,
+	 CString(_T("https:")),
 	 CString(_T("Switch to desktop and use the Start menu to launch a browser."))},
 
-	{_T("\uEC25"), _T("Personal folder"), LaunchType::Folder,
-	 CString(_T("::{59031a47-3f72-44a7-89c5-5595fe6b30ee}")),
-	 CString(_T("Switch to desktop and use the Start menu to launch File Explorer."))},
-
-	{_T("\uE7FC"), _T("Xbox"), LaunchType::Uri, CString(_T("msgamingapp:")),
-	 CString(_T("The latest version of Xbox app is required. Download link:\n")
-	         _T("https://apps.microsoft.com/detail/9MV0B5HZVK9Z"))}};
+	{_T("\uEC50"), _T("File Explorer"), LaunchType::Exe,
+	 CString(_T("explorer.exe")),
+	 CString(_T("Switch to desktop and use the Start menu to launch File Explorer."))}};
 
 const int NUM_BUTTONS = sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
 
@@ -105,12 +146,6 @@ void CLauncherButton::Launch() {
 	sei.nShow = SW_SHOWNORMAL;
 
 	switch (m_info.type) {
-	case LaunchType::Browser:
-		// Don't check whether the protocol is associated.
-		sei.lpVerb = L"open";
-		sei.lpFile = L"https://";  // Open the default browser.
-		break;
-
 	case LaunchType::Exe:
 		if (!IsFileExists(m_info.target)) {
 			AfxMessageBox(m_info.errorMessage);
@@ -120,11 +155,9 @@ void CLauncherButton::Launch() {
 		sei.lpFile = m_info.target;
 		break;
 
-	case LaunchType::Folder:
-		sei.lpVerb = L"open";
-		sei.lpFile = L"explorer.exe";
-		sei.lpParameters = m_info.target;
-		break;
+	case LaunchType::KeyCombination:
+		SendKeyCombination(m_info.target);
+		return;
 
 	case LaunchType::Uri:
 		sei.lpVerb = L"open";
@@ -141,7 +174,7 @@ void CLauncherButton::Launch() {
 
 
 BOOL CLauncherButton::IsFileExists(const CString& fileName) {
-	// 如果文件名不包含路径，搜索系统路径
+	// 如果文件名不包含路径, 搜索系统路径.
 	if (fileName.Find(L'\\') == -1 && fileName.Find(L'/') == -1) {
 		TCHAR szPath[MAX_PATH];
 		if (SearchPath(NULL, fileName, NULL, MAX_PATH, szPath, NULL)) {
@@ -151,4 +184,27 @@ BOOL CLauncherButton::IsFileExists(const CString& fileName) {
 	}
 
 	return GetFileAttributes(fileName) != INVALID_FILE_ATTRIBUTES;
+}
+
+
+void CLauncherButton::SendKeyCombination(const CString& keyCombination) {
+	INT length = keyCombination.GetLength(), lengthDouble = length * 2, i;
+	INPUT* inputs = new INPUT[lengthDouble]();
+
+	for (i=0;i<length;++i) {
+		// Press the key.
+		(inputs + i)->type = INPUT_KEYBOARD;
+		(inputs + i)->ki.wVk = static_cast<WORD>(keyCombination.GetAt(i));
+	}
+
+	for (;i<lengthDouble;++i) {
+		// Release the key.
+		(inputs + i)->type = INPUT_KEYBOARD;
+		(inputs + i)->ki.wVk = static_cast<WORD>(keyCombination.GetAt(lengthDouble - 1 - i));
+		(inputs + i)->ki.dwFlags = KEYEVENTF_KEYUP;
+	}
+
+	SendInput(lengthDouble, inputs, sizeof(INPUT));
+
+	delete[] inputs;
 }

@@ -164,21 +164,17 @@ void CFSEAppLauncherWindowsDlg::OnActivate(UINT nState, CWnd* pWndOther,
                                            BOOL bMinimized) {
 	CDialogEx::OnActivate(nState, pWndOther, bMinimized);
 
-	// If the window is inactive
 	if (nState == WA_INACTIVE) {
-		// If the active window is not definitely in the white list,
-		//  immediately minimize the window of App Launcher.
-		if (NeedMinimize()) {
-			ShowWindow(SW_MINIMIZE);
-		}
-	} else {
-		ExtendFrameIntoClientArea();
+		return;
+	}
 
-		// Redraw the icons of the buttons.
-		for (auto btn : m_buttons) {
-			if (btn) {
-				btn->Invalidate();
-			}
+	// If the window is active
+	ExtendFrameIntoClientArea();
+
+	// Redraw the icons of the buttons.
+	for (auto btn : m_buttons) {
+		if (btn) {
+			btn->Invalidate();
 		}
 	}
 }
@@ -340,22 +336,19 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 
 
 void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
-	switch (nType) {
-	case SIZE_MAXIMIZED:
-		CDialogEx::OnSize(nType, cx, cy);
+	if (nType == SIZE_RESTORED) {
+		ShowWindow(SW_SHOWMAXIMIZED);
+		return;
+	}
+
+	CDialogEx::OnSize(nType, cx, cy);
+
+	if (nType == SIZE_MAXIMIZED) {
 		// Resize ExplorerBrowser.
 		if (m_pExplorerBrowser) {
 			m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
 		}
 		UpdateButtonLayout();
-		break;
-
-	case SIZE_RESTORED:
-		ShowWindow(SW_SHOWMAXIMIZED);
-		break;
-
-	default:	// SIZE_MINIMIZED, SIZE_MAXHIDE, SIZE_MAXSHOW
-		CDialogEx::OnSize(nType, cx, cy);
 	}
 }
 
@@ -390,50 +383,6 @@ void CFSEAppLauncherWindowsDlg::ApplyDarkModeSettings(HWND hWnd) {
 	}
 
 	FreeLibrary(hUxtheme);
-}
-
-
-// Check that the activated window is not definitely in the whitelist.
-BOOL CFSEAppLauncherWindowsDlg::NeedMinimize() {
-	CWnd* cWndForeground = GetForegroundWindow();
-	if (!cWndForeground) {
-		return TRUE;
-	}
-
-	DWORD pid = NULL;
-	GetWindowThreadProcessId(cWndForeground->GetSafeHwnd(), &pid);
-	if (!pid) {
-		return TRUE;
-	}
-
-	HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION,
-	                              FALSE, pid);
-	if (!hProcess) {
-		return TRUE;
-	}
-
-	// Check that the process name does not match the specified string.
-	WCHAR szExeName[MAXCHAR];
-	DWORD dwSize = MAXCHAR;
-	if (QueryFullProcessImageName(hProcess, 0, szExeName, &dwSize)) {
-		CString strProcessName(szExeName);
-		strProcessName.MakeUpper();
-
-		if (strProcessName.Find(L"CONSENT.EXE") < 0 &&
-		    strProcessName.Find(L"FSEAPPLAUNCHER.WINDOWS.EXE") < 0 &&
-						strProcessName.Find(L"MICROSOFT.CMDPAL.UI.EXE") < 0 &&
-		    strProcessName.Find(L"SHELLEXPERIENCEHOST.EXE") < 0 &&
-		    strProcessName.Find(L"SHELLHOST.EXE") < 0 &&
-		    strProcessName.Find(L"SLIDETOSHUTDOWN.EXE") < 0) {
-			CloseHandle(hProcess);
-			return TRUE;	// It is not in the whitelist.
-		}
-	}
-
-	// It is in the whitelist.
-	CloseHandle(hProcess);
-
-	return FALSE;
 }
 
 
@@ -650,10 +599,10 @@ INT CFSEAppLauncherWindowsDlg::GetCalculatedMarginForDpi(INT marginOrientation) 
 CRect CFSEAppLauncherWindowsDlg::NewRectForExplorerBrowser() {
 	CRect rect;
 
-	// 获取显示区域
+	// Get the display area.
 	GetClientRect(&rect);
 
-	// 调整区域，留出一些边距
+	// 调整区域, 留出一些边距.
 	INT ncPaddingLeft = GetCalculatedMarginForDpi(Left);
 	INT ncPaddingTop = GetCalculatedMarginForDpi(Top);
 	INT ncPaddingRight = GetCalculatedMarginForDpi(Right);
@@ -668,7 +617,7 @@ CRect CFSEAppLauncherWindowsDlg::NewRectForExplorerBrowser() {
 
 
 BOOL CFSEAppLauncherWindowsDlg::IsDarkMode() const {
-	// 首次调用时动态获取函数地址
+	// 首次调用时动态获取函数地址.
 	if (!g_pShouldAppsUseDarkMode) {
 		HMODULE hUxtheme =
 				LoadLibraryEx(L"uxtheme.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -777,7 +726,7 @@ void CFSEAppLauncherWindowsDlg::SetGroupingByName() {
 		return;
 	}
 
-	// Get the current view
+	// Get the current view.
 	IFolderView2* pFolderView2 = NULL;
 
 	if (SUCCEEDED(m_pExplorerBrowser->GetCurrentView(
