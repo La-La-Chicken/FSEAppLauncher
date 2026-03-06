@@ -43,7 +43,6 @@ BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CBaseDialog)
 	ON_WM_DESTROY()
 	ON_WM_ACTIVATE()
 	ON_WM_CREATE()
-	ON_WM_CTLCOLOR()
 	ON_MESSAGE(WM_DPICHANGED, &CFSEAppLauncherWindowsDlg::OnDpiChangedMessage)
 	ON_WM_MOVE()
 	ON_WM_SETTINGCHANGE()
@@ -260,24 +259,6 @@ int CFSEAppLauncherWindowsDlg::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 }
 
 
-HBRUSH CFSEAppLauncherWindowsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd,
-                                             UINT nCtlColor) {
-	HBRUSH hbr = CBaseDialog::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	BOOL bDarkMode = IsDarkMode();
-
-	if (nCtlColor == CTLCOLOR_STATIC) {
-		// Solid Background / Base
-		pDC->SetBkColor(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));
-		// Text / Primary
-		pDC->SetTextColor(bDarkMode ? RGB(255, 255, 255) : RGB(26, 26, 26));
-	}
-
-	// Solid Background / Base
-	return CreateSolidBrush(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));
-}
-
-
 LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
                                                        LPARAM lParam) {
 	// Call this function to correctly redraw the window
@@ -368,39 +349,6 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 		}
 		UpdateButtonLayout();
 	}
-}
-
-
-void CFSEAppLauncherWindowsDlg::ApplyDarkModeSettings(HWND hWnd) {
-	HMODULE hUxtheme = LoadLibraryEx(_T("uxtheme.dll"),
-	                                 NULL,
-	                                 LOAD_LIBRARY_SEARCH_SYSTEM32);
-	if (!hUxtheme) {
-		return;
-	}
-
-	// Windows 10 1903 and above only.
-	auto SetPreferredAppMode = (SetPreferredAppModeProc)GetProcAddress(
-			hUxtheme, MAKEINTRESOURCEA(135));
-	if (SetPreferredAppMode) {
-		SetPreferredAppMode(AllowDark);
-	}
-
-	// Refresh the color policy state and allow dark mode for the window.
-	auto RefreshImmersiveColorPolicyState =
-			(RefreshImmersiveColorPolicyStateProc)GetProcAddress(
-				hUxtheme, MAKEINTRESOURCEA(104));
-	auto AllowDarkModeForWindow = (AllowDarkModeForWindowProc)GetProcAddress(
-		hUxtheme, MAKEINTRESOURCEA(133));
-
-	if (RefreshImmersiveColorPolicyState) {
-		RefreshImmersiveColorPolicyState();
-	}
-	if (AllowDarkModeForWindow) {
-		AllowDarkModeForWindow(hWnd, TRUE);
-	}
-
-	FreeLibrary(hUxtheme);
 }
 
 
@@ -631,22 +579,6 @@ CRect CFSEAppLauncherWindowsDlg::NewRectForExplorerBrowser() {
 	                (ncPaddingTop - ncPaddingBottom) / 2);
 
 	return rect;
-}
-
-
-BOOL CFSEAppLauncherWindowsDlg::IsDarkMode() const {
-	// 首次调用时动态获取函数地址.
-	if (!g_pShouldAppsUseDarkMode) {
-		HMODULE hUxtheme =
-				LoadLibraryEx(_T("uxtheme.dll"), nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
-		if (hUxtheme) {
-			g_pShouldAppsUseDarkMode = (ShouldAppsUseDarkModeProc)GetProcAddress(
-					hUxtheme, MAKEINTRESOURCEA(132));	// 132 对应 ShouldAppsUseDarkMode
-			FreeLibrary(hUxtheme);
-		}
-	}
-
-	return g_pShouldAppsUseDarkMode ? g_pShouldAppsUseDarkMode() : FALSE;
 }
 
 

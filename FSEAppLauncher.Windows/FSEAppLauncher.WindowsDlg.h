@@ -31,14 +31,6 @@
 #endif
 
 
-typedef BOOL(WINAPI* AllowDarkModeForWindowProc)(HWND, BOOL);
-typedef void(WINAPI* RefreshImmersiveColorPolicyStateProc)();
-typedef DWORD(WINAPI* SetPreferredAppModeProc)(DWORD);
-
-typedef BOOL(WINAPI* ShouldAppsUseDarkModeProc)();
-static ShouldAppsUseDarkModeProc g_pShouldAppsUseDarkMode = nullptr;
-
-enum PreferredAppMode { Default, AllowDark, ForceDark, ForceLight };
 
 enum class MarginOrientation { Left, Top, Right, Bottom };
 
@@ -63,12 +55,10 @@ private:
 	void CreateButtons();                     // create the buttons
 	void UpdateButtonLayout();                // update the button layout (when DPI is changed)
 
-	void ApplyDarkModeSettings(HWND hWnd);
 	BOOL CreateExplorerBrowser();
 	void DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();
 	INT GetCalculatedMarginForDpi(MarginOrientation marginOrientation) const;
-	BOOL IsDarkMode() const;
 	CRect NewRectForExplorerBrowser();
 	void PaintTitle(CPaintDC* pDC);
 	void SetGroupingByName();
@@ -102,7 +92,6 @@ protected:
 	                           LPARAM lParam) override;
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg LRESULT OnDpiChangedMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnMove(int x, int y);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
