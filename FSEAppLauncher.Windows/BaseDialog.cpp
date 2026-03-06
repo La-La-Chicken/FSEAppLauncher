@@ -65,9 +65,63 @@ BOOL IsDarkMode() {
 
 
 BEGIN_MESSAGE_MAP(CBaseDialog, CDialogEx)
+	ON_WM_CREATE()
 	ON_WM_CTLCOLOR()
 	ON_MESSAGE(WM_NCCALCSIZE, &CBaseDialog::OnNcCalcSizeMessage)
+	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
+
+
+int CBaseDialog::OnCreate(LPCREATESTRUCT lpCreateStruct) {
+	int result = CDialogEx::OnCreate(lpCreateStruct);
+	if (result == -1) {
+		return -1;
+	}
+
+	ApplyDarkModeSettings(GetSafeHwnd());
+
+	BOOL bTRUE = TRUE;
+	BOOL bDarkMode = IsDarkMode();
+	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
+	INT nValue = 2/* = DWMWCP_ROUND *//* = DWMSBT_MAINWINDOW */;
+
+	DwmSetWindowAttribute(GetSafeHwnd(),
+	                      DWMWA_DISALLOW_PEEK,
+	                      &bTRUE,
+	                      sizeof(bTRUE));
+	DwmSetWindowAttribute(GetSafeHwnd(),
+	                      DWMWA_USE_HOSTBACKDROPBRUSH,
+	                      &bTRUE,
+	                      sizeof(bTRUE));
+	if (bDarkMode) {
+		DwmSetWindowAttribute(GetSafeHwnd(),
+		                      DWMWA_USE_IMMERSIVE_DARK_MODE,
+		                      &bDarkMode,
+		                      sizeof(bDarkMode));
+	}
+	DwmSetWindowAttribute(GetSafeHwnd(),
+	                      DWMWA_TEXT_COLOR,
+	                      &rgb,
+	                      sizeof(rgb));
+	DwmSetWindowAttribute(GetSafeHwnd(),
+	                      DWMWA_WINDOW_CORNER_PREFERENCE,
+	                      &nValue,
+	                      sizeof(nValue));
+	DwmSetWindowAttribute(GetSafeHwnd(),
+	                      DWMWA_SYSTEMBACKDROP_TYPE,
+	                      &nValue,
+	                      sizeof(nValue));
+
+	CRect rect;
+	GetWindowRect(&rect);
+
+	// Inform the application of the frame change.
+	SetWindowPos(NULL, rect.left, rect.top,
+	             rect.Width(), rect.Height(),
+	             SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+
+	return result;	// 返回 0 表示成功，-1 表示失败会销毁窗口.
+}
 
 
 HBRUSH CBaseDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
@@ -93,4 +147,27 @@ LRESULT CBaseDialog::OnNcCalcSizeMessage(WPARAM wParam, LPARAM lParam) {
 	}
 
 	return Default();	// 否则调用默认处理（例如窗口最小化/最大化时的计算）
+}
+
+
+void CBaseDialog::OnSettingChange(UINT uFlags, LPCTSTR lpszSection) {
+	CDialogEx::OnSettingChange(uFlags, lpszSection);
+
+	// Check if it is not a change in the system's Immersive Color Set.
+	if (!lpszSection || _tcsicmp(lpszSection, _T("ImmersiveColorSet"))) {
+		return;
+	}
+
+	// Update the dark mode of the title bar.
+	BOOL bDarkMode = IsDarkMode();
+	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
+
+	DwmSetWindowAttribute(GetSafeHwnd(),
+	                      DWMWA_USE_IMMERSIVE_DARK_MODE,
+	                      &bDarkMode,
+	                      sizeof(bDarkMode));
+	DwmSetWindowAttribute(GetSafeHwnd(),
+	                      DWMWA_TEXT_COLOR,
+	                      &rgb,
+	                      sizeof(rgb));
 }

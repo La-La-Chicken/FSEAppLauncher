@@ -10,27 +10,6 @@
 #include "LauncherButton.h"
 
 
-#ifndef DWMWA_USE_HOSTBACKDROPBRUSH
-#define DWMWA_USE_HOSTBACKDROPBRUSH 17
-#endif
-
-#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
-#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
-#endif
-
-#ifndef DWMWA_WINDOW_CORNER_PREFERENCE
-#define DWMWA_WINDOW_CORNER_PREFERENCE 33
-#endif
-
-#ifndef DWMWA_TEXT_COLOR
-#define DWMWA_TEXT_COLOR 36
-#endif
-
-#ifndef DWMWA_SYSTEMBACKDROP_TYPE
-#define DWMWA_SYSTEMBACKDROP_TYPE 38
-#endif
-
-
 
 enum class MarginOrientation { Left, Top, Right, Bottom };
 
@@ -91,7 +70,6 @@ protected:
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam,
 	                           LPARAM lParam) override;
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT OnDpiChangedMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnMove(int x, int y);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);

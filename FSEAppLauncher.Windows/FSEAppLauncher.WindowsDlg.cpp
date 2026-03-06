@@ -42,7 +42,6 @@ BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CBaseDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
 	ON_WM_ACTIVATE()
-	ON_WM_CREATE()
 	ON_MESSAGE(WM_DPICHANGED, &CFSEAppLauncherWindowsDlg::OnDpiChangedMessage)
 	ON_WM_MOVE()
 	ON_WM_SETTINGCHANGE()
@@ -207,58 +206,6 @@ void CFSEAppLauncherWindowsDlg::OnActivate(UINT nState, CWnd* pWndOther,
 }
 
 
-int CFSEAppLauncherWindowsDlg::OnCreate(LPCREATESTRUCT lpCreateStruct) {
-	int result = CBaseDialog::OnCreate(lpCreateStruct);
-	if (result == -1) {
-		return -1;
-	}
-
-	ApplyDarkModeSettings(GetSafeHwnd());
-
-	BOOL bTRUE = TRUE;
-	BOOL bDarkMode = IsDarkMode();
-	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
-	INT nValue = 2/* = DWMWCP_ROUND *//* = DWMSBT_MAINWINDOW */;
-
-	DwmSetWindowAttribute(GetSafeHwnd(),
-	                      DWMWA_DISALLOW_PEEK,
-	                      &bTRUE,
-	                      sizeof(bTRUE));
-	DwmSetWindowAttribute(GetSafeHwnd(),
-	                      DWMWA_USE_HOSTBACKDROPBRUSH,
-	                      &bTRUE,
-	                      sizeof(bTRUE));
-	if (bDarkMode) {
-		DwmSetWindowAttribute(GetSafeHwnd(),
-		                      DWMWA_USE_IMMERSIVE_DARK_MODE,
-		                      &bDarkMode,
-		                      sizeof(bDarkMode));
-	}
-	DwmSetWindowAttribute(GetSafeHwnd(),
-	                      DWMWA_TEXT_COLOR,
-	                      &rgb,
-	                      sizeof(rgb));
-	DwmSetWindowAttribute(GetSafeHwnd(),
-	                      DWMWA_WINDOW_CORNER_PREFERENCE,
-	                      &nValue,
-	                      sizeof(nValue));
-	DwmSetWindowAttribute(GetSafeHwnd(),
-	                      DWMWA_SYSTEMBACKDROP_TYPE,
-	                      &nValue,
-	                      sizeof(nValue));
-
-	CRect rect;
-	GetWindowRect(&rect);
-
-	// Inform the application of the frame change.
-	SetWindowPos(NULL, rect.left, rect.top,
-	             rect.Width(), rect.Height(),
-	             SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-
-	return result;	// 返回 0 表示成功，-1 表示失败会销毁窗口.
-}
-
-
 LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
                                                        LPARAM lParam) {
 	// Call this function to correctly redraw the window
@@ -295,24 +242,6 @@ void CFSEAppLauncherWindowsDlg::OnMove(int x, int y) {
 void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
                                                 LPCTSTR lpszSection) {
 	CBaseDialog::OnSettingChange(uFlags, lpszSection);
-
-	// 检测是否不是系统颜色主题（Immersive Color Set）的变化
-	if (!lpszSection || _tcsicmp(lpszSection, _T("ImmersiveColorSet"))) {
-		return;
-	}
-
-	// Update the dark mode of the title bar.
-	BOOL bDarkMode = IsDarkMode();
-	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
-
-	DwmSetWindowAttribute(GetSafeHwnd(),
-	                      DWMWA_USE_IMMERSIVE_DARK_MODE,
-	                      &bDarkMode,
-	                      sizeof(bDarkMode));
-	DwmSetWindowAttribute(GetSafeHwnd(),
-	                      DWMWA_TEXT_COLOR,
-	                      &rgb,
-	                      sizeof(rgb));
 
 	// Notify ExplorerBrowser to switch between light / dark mode.
 	if (m_pExplorerBrowser) {
