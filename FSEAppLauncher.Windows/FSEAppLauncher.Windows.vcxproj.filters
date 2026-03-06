@@ -39,6 +39,9 @@
     <ClInclude Include="BaseDialog.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="AboutDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FSEAppLauncher.Windows.cpp">
@@ -54,6 +57,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="BaseDialog.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AboutDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

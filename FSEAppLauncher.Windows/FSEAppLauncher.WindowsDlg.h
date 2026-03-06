@@ -6,6 +6,7 @@
 
 
 #include "BaseDialog.h"
+#include "AboutDlg.h"
 #include "LauncherButton.h"
 
 

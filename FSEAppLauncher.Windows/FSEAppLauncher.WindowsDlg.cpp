@@ -3,48 +3,12 @@
 //
 
 #include "pch.h"
-#include "framework.h"
-#include "FSEAppLauncher.Windows.h"
 #include "FSEAppLauncher.WindowsDlg.h"
-#include "afxdialogex.h"
 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
-
-// CAboutDlg dialog used for App About
-
-class CAboutDlg : public CBaseDialog {
-public:
-	CAboutDlg();
-
-// Dialog Data
-#ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_ABOUTBOX };
-#endif
-
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-// Implementation
-protected:
-	DECLARE_MESSAGE_MAP()
-};
-
-
-CAboutDlg::CAboutDlg() : CBaseDialog(IDD_ABOUTBOX) {}
-
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
-	CBaseDialog::DoDataExchange(pDX);
-}
-
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CBaseDialog)
-END_MESSAGE_MAP()
 
 
 

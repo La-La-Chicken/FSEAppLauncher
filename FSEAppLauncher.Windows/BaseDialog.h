@@ -1,4 +1,8 @@
 #pragma once
+
+
+#include "framework.h"
+#include "FSEAppLauncher.Windows.h"
 #include <afxdialogex.h>
 
 
