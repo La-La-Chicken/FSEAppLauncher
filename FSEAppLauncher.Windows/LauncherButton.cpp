@@ -164,6 +164,7 @@ void CLauncherButton::Launch() {
 	case LaunchType::Uri:
 		sei.lpVerb = _T("open");
 		sei.lpFile = m_info.target;
+		break;
 
 	default:
 		AfxMessageBox(_T("Error: Invalid parameter."));
