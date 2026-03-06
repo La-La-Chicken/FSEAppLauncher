@@ -83,7 +83,7 @@ int CBaseDialog::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	BOOL bTRUE = TRUE;
 	BOOL bDarkMode = IsDarkMode();
 	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
-	INT nValue = 2/* = DWMWCP_ROUND *//* = DWMSBT_MAINWINDOW */;
+	INT nValue = 2;	/* = DWMWCP_ROUND *//* = DWMSBT_MAINWINDOW */
 
 	DwmSetWindowAttribute(GetSafeHwnd(),
 	                      DWMWA_DISALLOW_PEEK,
@@ -120,7 +120,9 @@ int CBaseDialog::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	             rect.Width(), rect.Height(),
 	             SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
 
-	return result;	// 返回 0 表示成功，-1 表示失败会销毁窗口.
+	// Returning 0 indicates success, and -1 indicates
+	//  failure destroys the window.
+	return result;
 }
 
 
@@ -142,11 +144,16 @@ HBRUSH CBaseDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
 
 
 LRESULT CBaseDialog::OnNcCalcSizeMessage(WPARAM wParam, LPARAM lParam) {
-	if (wParam == TRUE) {	// 当 wParam 为 TRUE 时，表示需要计算客户区大小
-		return 0;	// 返回 0 表示整个窗口区域都将作为客户区（即移除标准框架）
+	// When wParam is TRUE, the client area size needs to be calculated.
+	if (wParam == TRUE) {
+		// Returning 0 indicates that the entire window area will be used
+		//  as the client area (i.e., the standard frame is removed).
+		return 0;
 	}
 
-	return Default();	// 否则调用默认处理（例如窗口最小化/最大化时的计算）
+	// Otherwise, default processing (e.g., window
+	//  minimization/maximization calculations) is invoked.
+	return Default();
 }
 
 
@@ -170,4 +177,8 @@ void CBaseDialog::OnSettingChange(UINT uFlags, LPCTSTR lpszSection) {
 	                      DWMWA_TEXT_COLOR,
 	                      &rgb,
 	                      sizeof(rgb));
+
+	// Redraw the window when not minimized.
+	RedrawWindow(NULL, NULL,
+	             RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 }

@@ -256,10 +256,6 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 			}
 		}
 	}
-
-	// Redraw the window to refresh the title when not minimized.
-	RedrawWindow(NULL, NULL,
-	             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 }
 
 
