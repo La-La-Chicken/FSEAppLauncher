@@ -5,6 +5,7 @@
 #pragma once
 
 
+#include "BaseDialog.h"
 #include "LauncherButton.h"
 
 
@@ -43,7 +44,7 @@ enum class MarginOrientation { Left, Top, Right, Bottom };
 
 
 // CFSEAppLauncherWindowsDlg dialog
-class CFSEAppLauncherWindowsDlg : public CDialogEx {
+class CFSEAppLauncherWindowsDlg : public CBaseDialog {
 private:
 	const INT m_ncPaddingNormal = 48;
 	const INT m_ncPaddingTopIncrement = 64;
@@ -103,7 +104,6 @@ protected:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg LRESULT OnDpiChangedMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnMove(int x, int y);
-	afx_msg LRESULT OnNcCalcSizeMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()

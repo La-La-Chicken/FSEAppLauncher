@@ -17,7 +17,7 @@
 
 // CAboutDlg dialog used for App About
 
-class CAboutDlg : public CDialogEx {
+class CAboutDlg : public CBaseDialog {
 public:
 	CAboutDlg();
 
@@ -35,15 +35,15 @@ protected:
 };
 
 
-CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX) {}
+CAboutDlg::CAboutDlg() : CBaseDialog(IDD_ABOUTBOX) {}
 
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
-	CDialogEx::DoDataExchange(pDX);
+	CBaseDialog::DoDataExchange(pDX);
 }
 
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CAboutDlg, CBaseDialog)
 END_MESSAGE_MAP()
 
 
@@ -53,7 +53,7 @@ END_MESSAGE_MAP()
 
 
 CFSEAppLauncherWindowsDlg::CFSEAppLauncherWindowsDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_FSEAPPLAUNCHERWINDOWS_DIALOG, pParent) {
+	: CBaseDialog(IDD_FSEAPPLAUNCHERWINDOWS_DIALOG, pParent) {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
@@ -68,11 +68,11 @@ CFSEAppLauncherWindowsDlg::~CFSEAppLauncherWindowsDlg() {
 
 
 void CFSEAppLauncherWindowsDlg::DoDataExchange(CDataExchange* pDX) {
-	CDialogEx::DoDataExchange(pDX);
+	CBaseDialog::DoDataExchange(pDX);
 }
 
 
-BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CBaseDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
@@ -82,7 +82,6 @@ BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CDialogEx)
 	ON_WM_CTLCOLOR()
 	ON_MESSAGE(WM_DPICHANGED, &CFSEAppLauncherWindowsDlg::OnDpiChangedMessage)
 	ON_WM_MOVE()
-	ON_MESSAGE(WM_NCCALCSIZE, &CFSEAppLauncherWindowsDlg::OnNcCalcSizeMessage)
 	ON_WM_SETTINGCHANGE()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
@@ -92,7 +91,7 @@ END_MESSAGE_MAP()
 // CFSEAppLauncherWindowsDlg message handlers
 
 BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
-	CDialogEx::OnInitDialog();
+	CBaseDialog::OnInitDialog();
 
 	// Add "About..." menu item to system menu.
 
@@ -144,7 +143,7 @@ void CFSEAppLauncherWindowsDlg::OnSysCommand(UINT nID, LPARAM lParam) {
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
 	} else {
-		CDialogEx::OnSysCommand(nID, lParam);
+		CBaseDialog::OnSysCommand(nID, lParam);
 	}
 }
 
@@ -173,7 +172,7 @@ void CFSEAppLauncherWindowsDlg::OnPaint() {
 		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
 	} else {
-		CDialogEx::OnPaint();
+		CBaseDialog::OnPaint();
 	}
 
 	PaintTitle(&dc);
@@ -196,14 +195,14 @@ BOOL CFSEAppLauncherWindowsDlg::OnCommand(WPARAM wParam, LPARAM lParam) {
 			return TRUE;
 		}
 	}
-	return CDialogEx::OnCommand(wParam, lParam);
+	return CBaseDialog::OnCommand(wParam, lParam);
 }
 
 
 void CFSEAppLauncherWindowsDlg::OnDestroy() {
 	DestroyExplorerBrowser();
 
-	CDialogEx::OnDestroy();
+	CBaseDialog::OnDestroy();
 }
 
 
@@ -221,13 +220,13 @@ LRESULT CFSEAppLauncherWindowsDlg::WindowProc(UINT message, WPARAM wParam,
 	}
 
 	// DWM 未处理, 调用基类默认处理.
-	return CDialogEx::WindowProc(message, wParam, lParam);
+	return CBaseDialog::WindowProc(message, wParam, lParam);
 }
 
 
 void CFSEAppLauncherWindowsDlg::OnActivate(UINT nState, CWnd* pWndOther,
                                            BOOL bMinimized) {
-	CDialogEx::OnActivate(nState, pWndOther, bMinimized);
+	CBaseDialog::OnActivate(nState, pWndOther, bMinimized);
 
 	if (nState == WA_INACTIVE) {
 		return;
@@ -246,7 +245,7 @@ void CFSEAppLauncherWindowsDlg::OnActivate(UINT nState, CWnd* pWndOther,
 
 
 int CFSEAppLauncherWindowsDlg::OnCreate(LPCREATESTRUCT lpCreateStruct) {
-	int result = CDialogEx::OnCreate(lpCreateStruct);
+	int result = CBaseDialog::OnCreate(lpCreateStruct);
 	if (result == -1) {
 		return -1;
 	}
@@ -299,7 +298,7 @@ int CFSEAppLauncherWindowsDlg::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 
 HBRUSH CFSEAppLauncherWindowsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd,
                                              UINT nCtlColor) {
-	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+	HBRUSH hbr = CBaseDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 
 	BOOL bDarkMode = IsDarkMode();
 
@@ -344,23 +343,13 @@ void CFSEAppLauncherWindowsDlg::OnMove(int x, int y) {
 		return;
 	}
 
-	CDialogEx::OnMove(x, y);
-}
-
-
-LRESULT CFSEAppLauncherWindowsDlg::OnNcCalcSizeMessage(WPARAM wParam,
-                                                       LPARAM lParam) {
-	if (wParam == TRUE) {	// 当 wParam 为 TRUE 时，表示需要计算客户区大小
-		return 0;	// 返回 0 表示整个窗口区域都将作为客户区（即移除标准框架）
-	}
-
-	return Default();	// 否则调用默认处理（例如窗口最小化/最大化时的计算）
+	CBaseDialog::OnMove(x, y);
 }
 
 
 void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
                                                 LPCTSTR lpszSection) {
-	CDialogEx::OnSettingChange(uFlags, lpszSection);
+	CBaseDialog::OnSettingChange(uFlags, lpszSection);
 
 	// 检测是否不是系统颜色主题（Immersive Color Set）的变化
 	if (!lpszSection || _tcsicmp(lpszSection, _T("ImmersiveColorSet"))) {
@@ -406,7 +395,7 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 		return;
 	}
 
-	CDialogEx::OnSize(nType, cx, cy);
+	CBaseDialog::OnSize(nType, cx, cy);
 
 	if (nType == SIZE_MAXIMIZED) {
 		// Resize ExplorerBrowser.

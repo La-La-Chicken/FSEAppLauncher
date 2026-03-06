@@ -192,6 +192,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BaseDialog.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FSEAppLauncher.Windows.h" />
     <ClInclude Include="FSEAppLauncher.WindowsDlg.h" />
@@ -201,6 +202,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseDialog.cpp" />
     <ClCompile Include="FSEAppLauncher.Windows.cpp" />
     <ClCompile Include="FSEAppLauncher.WindowsDlg.cpp" />
     <ClCompile Include="LauncherButton.cpp" />
