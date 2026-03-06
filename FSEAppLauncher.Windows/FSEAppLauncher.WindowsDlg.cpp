@@ -17,8 +17,7 @@
 
 // CAboutDlg dialog used for App About
 
-class CAboutDlg : public CDialogEx
-{
+class CAboutDlg : public CDialogEx {
 public:
 	CAboutDlg();
 
@@ -35,14 +34,14 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
-{
-}
 
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX) {}
+
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialogEx::DoDataExchange(pDX);
 }
+
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
@@ -71,6 +70,7 @@ CFSEAppLauncherWindowsDlg::~CFSEAppLauncherWindowsDlg() {
 void CFSEAppLauncherWindowsDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialogEx::DoDataExchange(pDX);
 }
+
 
 BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
