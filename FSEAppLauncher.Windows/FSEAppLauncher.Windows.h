@@ -1,5 +1,5 @@
 ﻿
-// FSEAppLauncher.Windows.h: PROJECT_NAME 应用程序的主头文件
+// FSEAppLauncher.Windows.h: main header file for the PROJECT_NAME application
 //
 
 #pragma once
@@ -8,23 +8,23 @@
 	#error "include 'pch.h' before including this file for PCH"
 #endif
 
-#include "resource.h"		// 主符号
+#include "resource.h"		// main symbols
 
 
 // CFSEAppLauncherApp:
-// 有关此类的实现，请参阅 FSEAppLauncher.Windows.cpp
+// See FSEAppLauncher.Windows.cpp for the implementation of this class
 //
 
 class CFSEAppLauncherApp : public CWinApp {
 public:
 	CFSEAppLauncherApp();
 
-// 重写
+// Overrides
 public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
 
-// 实现
+// Implementation
 
 	DECLARE_MESSAGE_MAP()
 };

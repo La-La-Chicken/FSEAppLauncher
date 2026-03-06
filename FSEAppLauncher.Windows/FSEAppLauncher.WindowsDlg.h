@@ -1,5 +1,5 @@
 ﻿
-// FSEAppLauncher.WindowsDlg.h: 头文件
+// FSEAppLauncher.WindowsDlg.h: header file
 //
 
 #pragma once
@@ -31,7 +31,6 @@
 
 typedef BOOL(WINAPI* AllowDarkModeForWindowProc)(HWND, BOOL);
 typedef void(WINAPI* RefreshImmersiveColorPolicyStateProc)();
-typedef BOOL(WINAPI* AllowDarkModeForAppProc)(BOOL);
 typedef DWORD(WINAPI* SetPreferredAppModeProc)(DWORD);
 
 typedef BOOL(WINAPI* ShouldAppsUseDarkModeProc)();
@@ -39,11 +38,11 @@ static ShouldAppsUseDarkModeProc g_pShouldAppsUseDarkMode = nullptr;
 
 enum PreferredAppMode { Default, AllowDark, ForceDark, ForceLight };
 
-enum MarginOrientation { Left, Top, Right, Bottom, TitleTop, TitleHeight };
+enum class MarginOrientation { Left, Top, Right, Bottom };
 
 
 
-// CFSEAppLauncherWindowsDlg 对话框
+// CFSEAppLauncherWindowsDlg dialog
 class CFSEAppLauncherWindowsDlg : public CDialogEx {
 private:
 	const INT m_ncPaddingNormal = 48;
@@ -51,47 +50,47 @@ private:
 	const INT m_titlePaddingTop = 46;
 	const INT m_titleRectHeight = 40;
 
-	CFont m_fntIcon;                          // 图标字体
+	CFont m_fntIcon;                          // the font for icons
 
 	IExplorerBrowser* m_pExplorerBrowser = NULL;
 
-	std::vector<CLauncherButton*> m_buttons;  // 按钮数组
+	std::vector<CLauncherButton*> m_buttons;  // button array
 
-	void UpdateIconFont();  // 更新图标字体（DPI 变化时调用）
+	void UpdateIconFont();  // update the font for icons (when DPI is changed)
 
-	void CreateButtons();                     // 创建按钮
-	void UpdateButtonLayout();                // 更新按钮位置（DPI 变化时调用）
+	void CreateButtons();                     // create the buttons
+	void UpdateButtonLayout();                // update the button layout (when DPI is changed)
 
 	void ApplyDarkModeSettings(HWND hWnd);
-	BOOL NeedMinimize();
 	BOOL CreateExplorerBrowser();
 	void DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();
-	INT GetCalculatedMarginForDpi(INT marginOrientation) const;
+	INT GetCalculatedMarginForDpi(MarginOrientation marginOrientation) const;
 	BOOL IsDarkMode() const;
 	CRect NewRectForExplorerBrowser();
 	void PaintTitle(CPaintDC* pDC);
 	void SetGroupingByName();
 
-// 构造
+// Construction
 public:
-	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);  // 标准构造函数
-	virtual ~CFSEAppLauncherWindowsDlg();                // 添加析构函数
+	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);  // standard constructor
+	virtual ~CFSEAppLauncherWindowsDlg();                // 析构函数
 
-// 对话框数据
+// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_FSEAPPLAUNCHERWINDOWS_DIALOG };
 #endif
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);  // DDX/DDV 支持
+	virtual void DoDataExchange(CDataExchange* pDX);  // DDX/DDV support
 
-// 实现
+// Implementation
 protected:
 	HICON m_hIcon;
 
-	// 生成的消息映射函数
+	// Generated message map functions
 	virtual BOOL OnInitDialog();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);

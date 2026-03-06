@@ -24,11 +24,13 @@ const ButtonInfo g_ButtonInfos[] = {
 	 CString(_T("Switch to desktop and use the Start menu to launch Settings."))},
 
 	{_T("\uE91C"), _T("Notifications"), LaunchType::KeyCombination,
-	 CString(keyCombinationForNotifications, sizeof(keyCombinationForNotifications) / sizeof(TCHAR)),
+	 CString(keyCombinationForNotifications,
+	         sizeof(keyCombinationForNotifications) / sizeof(TCHAR)),
 	 CString(_T("Switch to desktop to use this feature."))},
 
 	{_T("\uF8A6"), _T("Quick Settings"), LaunchType::KeyCombination,
-	 CString(keyCombinationForQuickSettings, sizeof(keyCombinationForQuickSettings) / sizeof(TCHAR)),
+	 CString(keyCombinationForQuickSettings,
+	         sizeof(keyCombinationForQuickSettings) / sizeof(TCHAR)),
 	 CString(_T("Switch to desktop to use this feature."))},
 
 	{_T("\uE773"), _T("Command Palette (PowerToys)"), LaunchType::Uri,
@@ -51,15 +53,15 @@ const ButtonInfo g_ButtonInfos[] = {
 	 CString(_T("The latest version of Epic Games Launcher is required. Download link:\n")
 	         _T("https://apps.microsoft.com/detail/XP99VR1BPSBQJ2"))},
 
-	{_T("\uE7FC"), _T("Steam"), LaunchType::Uri,
-	 CString(_T("steam:")),
-	 CString(_T("The latest version of Steam is required. Download link:\n")
-	         _T("https://store.steampowered.com/about/"))},
-
 	{_T("\uE7FC"), _T("EA"), LaunchType::Uri,
 	 CString(_T("origin2:")),
 	 CString(_T("The latest version of EA app is required. Download link:\n")
 	         _T("https://www.ea.com/ea-app#downloads"))},
+
+	{_T("\uE7FC"), _T("Steam"), LaunchType::Uri,
+	 CString(_T("steam://open/bigpicture")),
+	 CString(_T("The latest version of Steam is required. Download link:\n")
+	         _T("https://store.steampowered.com/about/"))},
 
 	{_T("\uE7FC"), _T("Xbox"), LaunchType::Uri,
 	 CString(_T("msgamingapp:")),
@@ -89,7 +91,7 @@ void CLauncherButton::OnPaint() {
 	int cx = rect.Width();
 	int cy = rect.Height();
 
-	// DC 32 bit DIB
+	// DC, 32 bit DIB.
 	CDC memDC;
 	memDC.CreateCompatibleDC(&dc);
 	BITMAPINFO bmi = {};
@@ -151,7 +153,7 @@ void CLauncherButton::Launch() {
 			AfxMessageBox(m_info.errorMessage);
 			return;
 		}
-		sei.lpVerb = L"open";
+		sei.lpVerb = _T("open");
 		sei.lpFile = m_info.target;
 		break;
 
@@ -160,22 +162,26 @@ void CLauncherButton::Launch() {
 		return;
 
 	case LaunchType::Uri:
-		sei.lpVerb = L"open";
+		sei.lpVerb = _T("open");
 		sei.lpFile = m_info.target;
+
+	default:
+		AfxMessageBox(_T("Error: Invalid parameter."));
+		return;
 	}
 
 	if (!ShellExecuteEx(&sei)) {
 		DWORD dwErr = GetLastError();
 		CString strMsg;
-		strMsg.Format(L"Error: Failed to launch. Error code: %u", dwErr);
+		strMsg.Format(_T("Error: Failed to launch. Error code: %u"), dwErr);
 		AfxMessageBox(strMsg);
 	}
 }
 
 
 BOOL CLauncherButton::IsFileExists(const CString& fileName) {
-	// 如果文件名不包含路径, 搜索系统路径.
-	if (fileName.Find(L'\\') == -1 && fileName.Find(L'/') == -1) {
+	// If the filename does not contain a path, search for the system path.
+	if (fileName.Find(_T('\\')) == -1 && fileName.Find(_T('/')) == -1) {
 		TCHAR szPath[MAX_PATH];
 		if (SearchPath(NULL, fileName, NULL, MAX_PATH, szPath, NULL)) {
 			return TRUE;
@@ -200,7 +206,8 @@ void CLauncherButton::SendKeyCombination(const CString& keyCombination) {
 	for (;i<lengthDouble;++i) {
 		// Release the key.
 		(inputs + i)->type = INPUT_KEYBOARD;
-		(inputs + i)->ki.wVk = static_cast<WORD>(keyCombination.GetAt(lengthDouble - 1 - i));
+		(inputs + i)->ki.wVk = static_cast<WORD>(
+			keyCombination.GetAt(lengthDouble - 1 - i));
 		(inputs + i)->ki.dwFlags = KEYEVENTF_KEYUP;
 	}
 

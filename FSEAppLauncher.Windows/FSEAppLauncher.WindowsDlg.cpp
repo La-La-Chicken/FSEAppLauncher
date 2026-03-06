@@ -1,5 +1,5 @@
 ﻿
-// FSEAppLauncher.WindowsDlg.cpp: 实现文件
+// FSEAppLauncher.WindowsDlg.cpp: implementation file
 //
 
 #include "pch.h"
@@ -15,7 +15,41 @@
 
 
 
-// CFSEAppLauncherWindowsDlg 对话框
+// CAboutDlg dialog used for App About
+
+class CAboutDlg : public CDialogEx
+{
+public:
+	CAboutDlg();
+
+// Dialog Data
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_ABOUTBOX };
+#endif
+
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+// Implementation
+protected:
+	DECLARE_MESSAGE_MAP()
+};
+
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
+{
+}
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+END_MESSAGE_MAP()
+
+
+
+// CFSEAppLauncherWindowsDlg dialog
 
 
 
@@ -39,6 +73,7 @@ void CFSEAppLauncherWindowsDlg::DoDataExchange(CDataExchange* pDX) {
 }
 
 BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CDialogEx)
+	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
@@ -54,15 +89,35 @@ END_MESSAGE_MAP()
 
 
 
-// CFSEAppLauncherWindowsDlg 消息处理程序
+// CFSEAppLauncherWindowsDlg message handlers
 
 BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 	CDialogEx::OnInitDialog();
 
-	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
-	//  执行此操作
-	SetIcon(m_hIcon, TRUE);			// 设置大图标
-	SetIcon(m_hIcon, FALSE);		// 设置小图标
+	// Add "About..." menu item to system menu.
+
+	// IDM_ABOUTBOX must be in the system command range.
+	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+	ASSERT(IDM_ABOUTBOX < 0xF000);
+
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if (pSysMenu != NULL)
+	{
+		BOOL bNameValid;
+		CString strAboutMenu;
+		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		ASSERT(bNameValid);
+		if (!strAboutMenu.IsEmpty())
+		{
+			pSysMenu->AppendMenu(MF_SEPARATOR);
+			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+		}
+	}
+
+	// Set the icon for this dialog.  The framework does this automatically
+	//  when the application's main window is not a dialog
+	SetIcon(m_hIcon, TRUE);			// Set big icon
+	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	ShowWindow(SW_MAXIMIZE);
 
@@ -84,20 +139,30 @@ BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 }
 
 
-// 如果向对话框添加最小化按钮，则需要下面的代码
-//  来绘制该图标。  对于使用文档/视图模型的 MFC 应用程序，
-//  这将由框架自动完成。
+void CFSEAppLauncherWindowsDlg::OnSysCommand(UINT nID, LPARAM lParam) {
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX) {
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	} else {
+		CDialogEx::OnSysCommand(nID, lParam);
+	}
+}
+
+
+// If you add a minimize button to your dialog, you will need the code below
+//  to draw the icon.  For MFC applications using the document/view model,
+//  this is automatically done for you by the framework.
 
 void CFSEAppLauncherWindowsDlg::OnPaint() {
-	CPaintDC dc(this); // 用于绘制的设备上下文
+	CPaintDC dc(this); // device context for painting
 
 	if (IsIconic()) {
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
 		int iDpi = GetDpiForWindow(GetSafeHwnd());
 
-		// 使图标在工作区矩形中居中
-		// Replaced with Per-Monitor version.
+		// Center icon in client rectangle
+		// Use the Per-Monitor version of GetSystemMetrics.
 		int cxIcon = GetSystemMetricsForDpi(SM_CXICON, iDpi);
 		int cyIcon = GetSystemMetricsForDpi(SM_CYICON, iDpi);
 		CRect rect;
@@ -105,7 +170,7 @@ void CFSEAppLauncherWindowsDlg::OnPaint() {
 		int x = (rect.Width() - cxIcon + 1) / 2;
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
-		// 绘制图标
+		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
 	} else {
 		CDialogEx::OnPaint();
@@ -115,8 +180,8 @@ void CFSEAppLauncherWindowsDlg::OnPaint() {
 }
 
 
-//当用户拖动最小化窗口时系统调用此函数取得光标
-//显示。
+// The system calls this function to obtain the cursor to display while the user drags
+//  the minimized window.
 HCURSOR CFSEAppLauncherWindowsDlg::OnQueryDragIcon() {
 	return static_cast<HCURSOR>(m_hIcon);
 }
@@ -354,7 +419,7 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 
 
 void CFSEAppLauncherWindowsDlg::ApplyDarkModeSettings(HWND hWnd) {
-	HMODULE hUxtheme = LoadLibraryEx(L"uxtheme.dll",
+	HMODULE hUxtheme = LoadLibraryEx(_T("uxtheme.dll"),
 	                                 NULL,
 	                                 LOAD_LIBRARY_SEARCH_SYSTEM32);
 	if (!hUxtheme) {
@@ -396,7 +461,7 @@ void CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 	LOGFONT lf = {};
 	lf.lfHeight = -MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);
 	lf.lfWeight = 550;
-	wcscpy_s(lf.lfFaceName, L"Segoe Fluent Icons");
+	_tcscpy_s(lf.lfFaceName, LF_FACESIZE, _T("Segoe Fluent Icons"));
 	BOOL bCreated = m_fntIcon.CreateFontIndirect(&lf);
 
 	if (!bCreated) {
@@ -455,14 +520,14 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 	int spacing = MulDiv(4, iDpi, USER_DEFAULT_SCREEN_DPI) - 2;
 
 	// Right margin of the button set: Right padding of the dialog - 1 px padding.
-	int rightMargin = GetCalculatedMarginForDpi(Right) - 1;
+	int rightMargin = GetCalculatedMarginForDpi(MarginOrientation::Right) - 1;
 	// Top margin of the button set: Top margin of the title - 1 px padding.
 	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI) - 1;
 
 	CRect clientRect;
 	GetClientRect(&clientRect);
 
-	// Right-to-left layout.
+	// right-to-left layout
 	int x = clientRect.right - rightMargin - btnWidth;
 	int y = clientRect.top + topMargin;
 
@@ -518,7 +583,7 @@ BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 		LPITEMIDLIST pidl = NULL;
 		// Virtual folder "Applications"
 		if (SUCCEEDED(
-						SHParseDisplayName(L"shell:::{4234d49b-0245-4df3-b780-3893943456e1}",
+						SHParseDisplayName(_T("shell:::{4234d49b-0245-4df3-b780-3893943456e1}"),
 						                   NULL,
 						                   &pidl,
 						                   0,
@@ -554,36 +619,36 @@ void CFSEAppLauncherWindowsDlg::DestroyExplorerBrowser() {
 
 // Extend the frame into the client area.
 HRESULT CFSEAppLauncherWindowsDlg::ExtendFrameIntoClientArea() {
-	MARGINS margins = {GetCalculatedMarginForDpi(Left),
-	                   GetCalculatedMarginForDpi(Right),
-	                   GetCalculatedMarginForDpi(Top),
-	                   GetCalculatedMarginForDpi(Bottom)};
+	MARGINS margins = {GetCalculatedMarginForDpi(MarginOrientation::Left),
+	                   GetCalculatedMarginForDpi(MarginOrientation::Right),
+	                   GetCalculatedMarginForDpi(MarginOrientation::Top),
+	                   GetCalculatedMarginForDpi(MarginOrientation::Bottom)};
 
 	return DwmExtendFrameIntoClientArea(GetSafeHwnd(), &margins);
 }
 
 
-INT CFSEAppLauncherWindowsDlg::GetCalculatedMarginForDpi(INT marginOrientation) const {
+INT CFSEAppLauncherWindowsDlg::GetCalculatedMarginForDpi(MarginOrientation marginOrientation) const {
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 	switch (marginOrientation) {
-	case Left:
+	case MarginOrientation::Left:
 		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
 
-	case Top:
+	case MarginOrientation::Top:
 		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) +
 		              m_ncPaddingNormal + m_ncPaddingTopIncrement,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
 
-	case Right:
+	case MarginOrientation::Right:
 		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
 
-	case Bottom:
+	case MarginOrientation::Bottom:
 		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
@@ -603,10 +668,10 @@ CRect CFSEAppLauncherWindowsDlg::NewRectForExplorerBrowser() {
 	GetClientRect(&rect);
 
 	// 调整区域, 留出一些边距.
-	INT ncPaddingLeft = GetCalculatedMarginForDpi(Left);
-	INT ncPaddingTop = GetCalculatedMarginForDpi(Top);
-	INT ncPaddingRight = GetCalculatedMarginForDpi(Right);
-	INT ncPaddingBottom = GetCalculatedMarginForDpi(Bottom);
+	INT ncPaddingLeft = GetCalculatedMarginForDpi(MarginOrientation::Left);
+	INT ncPaddingTop = GetCalculatedMarginForDpi(MarginOrientation::Top);
+	INT ncPaddingRight = GetCalculatedMarginForDpi(MarginOrientation::Right);
+	INT ncPaddingBottom = GetCalculatedMarginForDpi(MarginOrientation::Bottom);
 	rect.DeflateRect((ncPaddingLeft + ncPaddingRight) / 2,
 	                 (ncPaddingTop + ncPaddingBottom) / 2);
 	rect.OffsetRect((ncPaddingLeft - ncPaddingRight) / 2,
@@ -620,7 +685,7 @@ BOOL CFSEAppLauncherWindowsDlg::IsDarkMode() const {
 	// 首次调用时动态获取函数地址.
 	if (!g_pShouldAppsUseDarkMode) {
 		HMODULE hUxtheme =
-				LoadLibraryEx(L"uxtheme.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+				LoadLibraryEx(_T("uxtheme.dll"), nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
 		if (hUxtheme) {
 			g_pShouldAppsUseDarkMode = (ShouldAppsUseDarkModeProc)GetProcAddress(
 					hUxtheme, MAKEINTRESOURCEA(132));	// 132 对应 ShouldAppsUseDarkMode
@@ -637,7 +702,7 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 	CRect rcClient;
 	GetClientRect(&rcClient);
 
-	HTHEME hTheme = OpenThemeData(NULL, L"CompositedWindow::Window");
+	HTHEME hTheme = OpenThemeData(NULL, _T("CompositedWindow::Window"));
 	if (!hTheme) {
 		return;
 	}
@@ -683,7 +748,7 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 				int nHeight = -MulDiv(28, iDpi, USER_DEFAULT_SCREEN_DPI);
 				lgFont.lfHeight = nHeight;
 				lgFont.lfWeight = FW_SEMIBOLD;
-				wcscpy_s(lgFont.lfFaceName, LF_FACESIZE, L"Segoe UI Variable Display");
+				_tcscpy_s(lgFont.lfFaceName, LF_FACESIZE, _T("Segoe UI Variable Display"));
 				if (font.CreateFontIndirect(&lgFont)) {
 					fontOld = pDCPaint.SelectObject(&font);
 				}
@@ -691,16 +756,16 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 
 			// Draw the title.
 			CRect rcPaint = rcClient;
-			rcPaint.left += GetCalculatedMarginForDpi(Left);
+			rcPaint.left += GetCalculatedMarginForDpi(MarginOrientation::Left);
 			rcPaint.top += MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
-			rcPaint.right -= GetCalculatedMarginForDpi(Right);
+			rcPaint.right -= GetCalculatedMarginForDpi(MarginOrientation::Right);
 			rcPaint.bottom = rcPaint.top +
 			                 MulDiv(m_titleRectHeight, iDpi, USER_DEFAULT_SCREEN_DPI);
 			DrawThemeTextEx(hTheme,
 			                pDCPaint.m_hDC,
 			                0,
 			                0,
-			                L"Apps",
+			                _T("Apps"),
 			                -1,
 			                DT_END_ELLIPSIS | DT_LEFT | DT_NOPREFIX |
 			                DT_SINGLELINE | DT_VCENTER,
