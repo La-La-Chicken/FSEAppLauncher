@@ -17,22 +17,14 @@
 
 
 CFSEAppLauncherWindowsDlg::CFSEAppLauncherWindowsDlg(CWnd* pParent /*=nullptr*/)
-	: CBaseDialog(IDD_FSEAPPLAUNCHERWINDOWS_DIALOG, pParent) {
+	: CBaseDialog(IDD_FSEAPPLAUNCHERWINDOWS_DIALOG, pParent),
+	  m_pExplorerBrowser(nullptr) {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 
 CFSEAppLauncherWindowsDlg::~CFSEAppLauncherWindowsDlg() {
-	if (m_pExplorerBrowser) {
-		m_pExplorerBrowser->Destroy();
-		m_pExplorerBrowser->Release();
-		m_pExplorerBrowser = NULL;
-	}
-}
-
-
-void CFSEAppLauncherWindowsDlg::DoDataExchange(CDataExchange* pDX) {
-	CBaseDialog::DoDataExchange(pDX);
+	DestroyExplorerBrowser();
 }
 
 
@@ -62,14 +54,12 @@ BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != NULL)
-	{
+	if (pSysMenu) {
 		BOOL bNameValid;
 		CString strAboutMenu;
 		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
 		ASSERT(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
+		if (!strAboutMenu.IsEmpty()) {
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
@@ -162,11 +152,7 @@ BOOL CFSEAppLauncherWindowsDlg::OnCommand(WPARAM wParam, LPARAM lParam) {
 
 
 void CFSEAppLauncherWindowsDlg::OnDestroy() {
-	if (m_pExplorerBrowser) {
-		m_pExplorerBrowser->Destroy();
-		m_pExplorerBrowser->Release();
-		m_pExplorerBrowser = NULL;
-	}
+	DestroyExplorerBrowser();
 
 	CBaseDialog::OnDestroy();
 }
@@ -225,8 +211,8 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 	}
 
 	// Redraw the window to refresh the title when not minimized.
-	RedrawWindow(NULL,
-	             NULL,
+	RedrawWindow(nullptr,
+	             nullptr,
 	             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 
 	return 0;
@@ -253,7 +239,7 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 		if (SUCCEEDED(m_pExplorerBrowser->GetCurrentView(
 		     IID_PPV_ARGS(&spShellView3))) &&
 		    spShellView3) {
-			HWND hwndView = NULL;
+			HWND hwndView = nullptr;
 			if (SUCCEEDED(spShellView3->GetWindow(&hwndView)) && hwndView) {
 				// Send WM_SETTINGCHANGE to the HWND of spShellView3.
 				::SendMessage(hwndView, WM_SETTINGCHANGE, uFlags, (LPARAM)lpszSection);
@@ -274,7 +260,7 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 	if (nType == SIZE_MAXIMIZED) {
 		// Resize ExplorerBrowser.
 		if (m_pExplorerBrowser) {
-			m_pExplorerBrowser->SetRect(NULL, NewRectForExplorerBrowser());
+			m_pExplorerBrowser->SetRect(nullptr, NewRectForExplorerBrowser());
 		}
 		UpdateButtonLayout();
 	}
@@ -282,14 +268,14 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 
 
 // Update the font info of the icons.
-void CFSEAppLauncherWindowsDlg::UpdateIconFont() {
+VOID CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 	if (m_fntIcon.GetSafeHandle()) {
 		m_fntIcon.DeleteObject();
 	}
 
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 	LOGFONT lf = {};
-	lf.lfHeight = -MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);
+	lf.lfHeight = -MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);	// 18 px font
 	lf.lfWeight = 550;
 	_tcscpy_s(lf.lfFaceName, LF_FACESIZE, _T("Segoe Fluent Icons"));
 	BOOL bCreated = m_fntIcon.CreateFontIndirect(&lf);
@@ -302,7 +288,7 @@ void CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 
 
 // Create the buttons.
-void CFSEAppLauncherWindowsDlg::CreateButtons() {
+VOID CFSEAppLauncherWindowsDlg::CreateButtons() {
 	// Destroy old buttons.
 	for (auto btn : m_buttons) {
 		if (btn) {
@@ -312,7 +298,7 @@ void CFSEAppLauncherWindowsDlg::CreateButtons() {
 	m_buttons.clear();
 
 	// Create new buttons.
-	for (int i = 0; i < NUM_BUTTONS; ++i) {
+	for (INT i = 0; i < NUM_BUTTONS; ++i) {
 		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i]);
 		if (!pBtn->Create(g_ButtonInfos[i].iconChar,
 		                  WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -335,7 +321,7 @@ void CFSEAppLauncherWindowsDlg::CreateButtons() {
 }
 
 
-void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
+VOID CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 	if (m_buttons.empty()) {
 		return;
 	}
@@ -378,7 +364,7 @@ void CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 
 BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 	HRESULT hr = CoCreateInstance(CLSID_ExplorerBrowser,
-	                              NULL,
+	                              nullptr,
 	                              CLSCTX_INPROC_SERVER,
 	                              IID_PPV_ARGS(&m_pExplorerBrowser));
 
@@ -410,14 +396,14 @@ BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 	                                    &fs);
 
 	if (SUCCEEDED(hr)) {
-		LPITEMIDLIST pidl = NULL;
+		LPITEMIDLIST pidl = nullptr;
 		// virtual folder "Applications"
 		if (SUCCEEDED(
 						SHParseDisplayName(_T("shell:::{4234d49b-0245-4df3-b780-3893943456e1}"),
-						                   NULL,
+						                   nullptr,
 						                   &pidl,
 						                   0,
-						                   NULL))) {
+						                   nullptr))) {
 			hr = m_pExplorerBrowser->BrowseToIDList(pidl, SBSP_ABSOLUTE);
 			if (SUCCEEDED(hr)){
 				SetGroupingByName();
@@ -435,6 +421,15 @@ BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 	}
 
 	return TRUE;
+}
+
+
+VOID CFSEAppLauncherWindowsDlg::DestroyExplorerBrowser() {
+	if (m_pExplorerBrowser) {
+		m_pExplorerBrowser->Destroy();
+		m_pExplorerBrowser->Release();
+		m_pExplorerBrowser = nullptr;
+	}
 }
 
 
@@ -503,11 +498,11 @@ CRect CFSEAppLauncherWindowsDlg::NewRectForExplorerBrowser() {
 
 
 // Paint the title on the custom frame.
-void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
+VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 	CRect rcClient;
 	GetClientRect(&rcClient);
 
-	HTHEME hTheme = OpenThemeData(NULL, _T("CompositedWindow::Window"));
+	HTHEME hTheme = OpenThemeData(nullptr, _T("CompositedWindow::Window"));
 	if (!hTheme) {
 		return;
 	}
@@ -532,8 +527,8 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		CBitmap* pBm = CBitmap::FromHandle(CreateDIBSection(pDC->m_hDC,
 		                                                    &dib,
 		                                                    DIB_RGB_COLORS,
-		                                                    NULL,
-		                                                    NULL,
+		                                                    nullptr,
+		                                                    nullptr,
 		                                                    0));
 		if (pBm) {
 			CBitmap* pBmOld = pDCPaint.SelectObject(pBm);
@@ -547,7 +542,7 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 
 			// Select a font.
 			CFont font;
-			CFont* fontOld = NULL;
+			CFont* fontOld = nullptr;
 			LOGFONT lgFont;
 			if (SUCCEEDED(GetThemeSysFont(hTheme, TMT_CAPTIONFONT, &lgFont))) {
 				int nHeight = -MulDiv(28, iDpi, USER_DEFAULT_SCREEN_DPI);
@@ -591,13 +586,13 @@ void CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 }
 
 
-void CFSEAppLauncherWindowsDlg::SetGroupingByName() {
+VOID CFSEAppLauncherWindowsDlg::SetGroupingByName() {
 	if (!m_pExplorerBrowser) {
 		return;
 	}
 
 	// Get the current view.
-	IFolderView2* pFolderView2 = NULL;
+	IFolderView2* pFolderView2 = nullptr;
 
 	if (SUCCEEDED(m_pExplorerBrowser->GetCurrentView(
 								IID_PPV_ARGS(&pFolderView2))) &&

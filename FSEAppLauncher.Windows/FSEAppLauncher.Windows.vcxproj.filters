@@ -77,7 +77,7 @@
     <Image Include="res\FSEAppLauncher.Windows.ico">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="res\Steam_Logo.png">
+    <Image Include="res\Logo_Steam.png">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

@@ -25,34 +25,31 @@ private:
 
 	CFont m_fntIcon;                          // the font for icons
 
-	IExplorerBrowser* m_pExplorerBrowser = NULL;
+	IExplorerBrowser* m_pExplorerBrowser;
 
 	std::vector<CLauncherButton*> m_buttons;  // button array
 
-	void UpdateIconFont();  // update the font for icons (when DPI is changed)
-
-	void CreateButtons();                     // create the buttons
-	void UpdateButtonLayout();                // update the button layout (when DPI is changed)
+	VOID UpdateIconFont();      // update the font for icons (when DPI is changed)
+	VOID CreateButtons();       // create the buttons
+	VOID UpdateButtonLayout();  // update the button layout (when DPI is changed)
 
 	BOOL CreateExplorerBrowser();
+	VOID DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();
 	INT GetCalculatedMarginForDpi(MarginOrientation marginOrientation) const;
 	CRect NewRectForExplorerBrowser();
-	void PaintTitle(CPaintDC* pDC);
-	void SetGroupingByName();
+	VOID PaintTitle(CPaintDC* pDC);
+	VOID SetGroupingByName();
 
 // Construction
 public:
 	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);  // standard constructor
-	virtual ~CFSEAppLauncherWindowsDlg();                // 析构函数
+	virtual ~CFSEAppLauncherWindowsDlg();                // destructor
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_FSEAPPLAUNCHERWINDOWS_DIALOG };
 #endif
-
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);  // DDX/DDV support
 
 // Implementation
 protected:

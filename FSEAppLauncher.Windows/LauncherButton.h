@@ -5,26 +5,29 @@
 #include <afxbutton.h>
 
 
-// 按钮启动类型
+// names of the icons in m_iconPngArray
+enum class IconPng { Steam };
+// button launch type
 enum class LaunchType { Exe, KeyCombination, Uri };
 
-// 按钮信息结构体
 struct ButtonInfo {
+	// custom PNG icon index, empty indicates no custom icon
+	      PCTSTR     iconPngResource;
 	// Segoe Fluent Icons character
-	const TCHAR*     iconChar;
+	      PCTSTR     iconChar;
 	// tooltip
-	const CString    tooltip;
+	      PCTSTR     tooltip;
 	// launch type
 	const LaunchType type;
 	// target identifier (directory/URI/key combination)
 	const CString    target;
 	// error message to show when failed to launch
-	const TCHAR*     errorMessage;
+	      PCTSTR     errorMessage;
 };
 
 // Declare the array. See .cpp for the definition.
-extern const ButtonInfo g_ButtonInfos[];
-extern const int NUM_BUTTONS;
+extern CONST ButtonInfo g_ButtonInfos[];
+extern CONST INT NUM_BUTTONS;
 
 
 
@@ -36,7 +39,7 @@ public:
 	CLauncherButton(const ButtonInfo& info);
 
 	// Execute operations.
-	void Launch();
+	VOID Launch();
 
 
 protected:
@@ -48,15 +51,13 @@ private:
 	// button info
 	ButtonInfo m_info;
 
-	// the Steam logo
-	CPngImage m_imgSteam;
-	// Indicates whether it is a Steam button.
-	BOOL m_bIsSteam = FALSE;
+	// the icon
+	CPngImage m_iconPng;
 	// helper function for loading icons
-	BOOL LoadSteamImage();
+	VOID LoadIconPng();
 	// helper function for drawing icons
-	void DrawSteamImage(CDC* pDC, const CRect& rect);
+	VOID DrawIconPng(CDC* pDC, const CRect& rect);
 
 	BOOL IsFileExists(const CString& fileName);
-	void SendKeyCombination(const CString& keyCombination);
+	VOID SendKeyCombination(const CString& keyCombination);
 };

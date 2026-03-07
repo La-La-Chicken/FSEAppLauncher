@@ -10,82 +10,106 @@ BEGIN_MESSAGE_MAP(CLauncherButton, CMFCButton)
 END_MESSAGE_MAP()
 
 
+// Do not add '\0'.
 TCHAR keyCombinationForNotifications[] = {VK_LWIN, 'N'};
 TCHAR keyCombinationForQuickSettings[] = {VK_LWIN, 'A'};
 
 // Define the buttons (right-to-left).
-const ButtonInfo g_ButtonInfos[] = {
-	{_T("\uE7E8"), CString(_T("Shut down")), LaunchType::Exe,
+CONST ButtonInfo g_ButtonInfos[] = {
+	{nullptr, _T("\uE7E8"),
+	 _T("Shut down"),
+	 LaunchType::Exe,
 	 CString(_T("SlideToShutDown.exe")),
 	 _T("Switch to desktop and use the Start menu to perform power operations.")},
 
-	{_T("\uE713"), CString(_T("Settings")), LaunchType::Uri,
+	{nullptr, _T("\uE713"),
+	 _T("Settings"),
+	 LaunchType::Uri,
 	 CString(_T("ms-settings:")),
 	 _T("Switch to desktop and use the Start menu to launch Settings.")},
 
-	{_T("\uE91C"), CString(_T("Notifications")), LaunchType::KeyCombination,
+	{nullptr, _T("\uE91C"),
+	 _T("Notifications"),
+	 LaunchType::KeyCombination,
 	 CString(keyCombinationForNotifications,
 	         sizeof(keyCombinationForNotifications) / sizeof(TCHAR)),
 	 _T("Switch to desktop to use this feature.")},
 
-	{_T("\uF8A6"), CString(_T("Quick Settings")), LaunchType::KeyCombination,
+	{nullptr, _T("\uF8A6"),
+	 _T("Quick Settings"),
+	 LaunchType::KeyCombination,
 	 CString(keyCombinationForQuickSettings,
 	         sizeof(keyCombinationForQuickSettings) / sizeof(TCHAR)),
 	 _T("Switch to desktop to use this feature.")},
 
-	{_T("\uE773"), CString(_T("Command Palette (PowerToys)")), LaunchType::Uri,
+	{nullptr, _T("\uE773"),
+	 _T("Command Palette (PowerToys)"),
+	 LaunchType::Uri,
 	 CString(_T("x-cmdpal:")),
 	 _T("The latest version of PowerToys is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/XP89DCGQ3K6VLD")},
 
-	{_T("\uE719"), CString(_T("Microsoft Store")), LaunchType::Uri,
+	{nullptr, _T("\uE719"),
+	 _T("Microsoft Store"),
+	 LaunchType::Uri,
 	 CString(_T("ms-windows-store:")),
 	 _T("The latest version of Microsoft Store is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/9WZDNCRFJBMP")},
 
-	{_T("\uED66"), CString(_T("GOG Galaxy")), LaunchType::Uri,
+	{nullptr, _T("\uED66"),
+	 _T("GOG Galaxy"),
+	 LaunchType::Uri,
 	 CString(_T("goggalaxy:")),
 	 _T("The latest version of GOG Galaxy is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/XPFFXW40W60KCF")},
 
-	{_T("\uE7FC"), CString(_T("Epic Games Launcher")), LaunchType::Uri,
+	{nullptr, _T("\uE7FC"),
+	 _T("Epic Games Launcher"),
+	 LaunchType::Uri,
 	 CString(_T("com.epicgames.launcher:")),
 	 _T("The latest version of Epic Games Launcher is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/XP99VR1BPSBQJ2")},
 
-	{_T("\uE7FC"), CString(_T("EA")), LaunchType::Uri,
+	{nullptr, _T("\uE7FC"),
+	 _T("EA"),
+	 LaunchType::Uri,
 	 CString(_T("origin2:")),
 	 _T("The latest version of EA app is required. Download link:\n")
 	 _T("https://www.ea.com/ea-app#downloads")},
 
-	{_T(""), CString(_T("Steam Big Picture Mode")), LaunchType::Uri,
+	{MAKEINTRESOURCE(IDB_PNG_STEAM), _T(""),
+	 _T("Steam Big Picture Mode"),
+	 LaunchType::Uri,
 	 CString(_T("steam://open/bigpicture")),
 	 _T("The latest version of Steam is required. Download link:\n")
 	 _T("https://store.steampowered.com/about/")},
 
-	{_T("\uE7FC"), CString(_T("Xbox")), LaunchType::Uri,
+	{nullptr, _T("\uE7FC"),
+	 _T("Xbox"),
+	 LaunchType::Uri,
 	 CString(_T("msgamingapp:")),
 	 _T("The latest version of Xbox app is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/9MV0B5HZVK9Z")},
 
-	{_T("\uE774"), CString(_T("Browser")), LaunchType::Uri,
+	{nullptr, _T("\uE774"),
+	 _T("Browser"),
+	 LaunchType::Uri,
 	 CString(_T("https:")),
 	 _T("Switch to desktop and use the Start menu to launch a browser.")},
 
-	{_T("\uEC50"), CString(_T("File Explorer")), LaunchType::Exe,
+	{nullptr, _T("\uEC50"),
+	 _T("File Explorer"),
+	 LaunchType::Exe,
 	 CString(_T("explorer.exe")),
 	 _T("Switch to desktop and use the Start menu to launch File Explorer.")}};
 
-const int NUM_BUTTONS = sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
+CONST INT NUM_BUTTONS = sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
 
 
 CLauncherButton::CLauncherButton(const ButtonInfo& info)
 	: m_info(info) {
-	// Find "Steam" in the tooltip.
-	if (info.tooltip.Find(_T("Steam")) >= 0) {
-		if (LoadSteamImage()) {
-			m_bIsSteam = TRUE;
-		}
+	if (m_info.iconPngResource) {
+		LoadIconPng();
 	}
 }
 
@@ -109,12 +133,12 @@ void CLauncherButton::OnPaint() {
 	bmi.bmiHeader.biBitCount = 32;
 	bmi.bmiHeader.biCompression = BI_RGB;
 
-	VOID* bits;
+	PVOID bits;
 	CBitmap* pBm = CBitmap::FromHandle(CreateDIBSection(dc.GetSafeHdc(),
 	                                                    &bmi,
 	                                                    DIB_RGB_COLORS,
 	                                                    &bits,
-	                                                    NULL,
+	                                                    nullptr,
 	                                                    0));
 	if (!pBm) {
 		return;
@@ -127,12 +151,12 @@ void CLauncherButton::OnPaint() {
 	            reinterpret_cast<WPARAM>(memDC.GetSafeHdc()),
 	            PRF_CLIENT | PRF_ERASEBKGND | PRF_NONCLIENT);
 
-	// If it's a Steam button and the icon is loaded, draw the icon.
-	if (m_bIsSteam/* && !m_imgSteam.IsNull() */) {
-		DrawSteamImage(&memDC, rect);
+	// If this button uses a custom icon, draw the icon.
+	if (m_info.iconPngResource) {
+		DrawIconPng(&memDC, rect);
 	}
 
-	DWORD* pPixel = (DWORD*)bits;
+	PDWORD pPixel = (PDWORD)bits;
 	for (int i = 0; i < cx * cy; ++i) {
 		pPixel[i] |= 0xFF000000;
 	}
@@ -156,7 +180,7 @@ void CLauncherButton::OnPaint() {
 
 
 
-void CLauncherButton::Launch() {
+VOID CLauncherButton::Launch() {
 	SHELLEXECUTEINFO sei = { sizeof(sei) };
 	sei.nShow = SW_SHOWNORMAL;
 
@@ -194,33 +218,29 @@ void CLauncherButton::Launch() {
 
 
 
-BOOL CLauncherButton::LoadSteamImage() {
-	if (!m_imgSteam.Load(MAKEINTRESOURCE(IDB_PNG_STEAM),
-	                     AfxGetResourceHandle())) {
-		AfxMessageBox(_T("Error: Cannot load the Steam icon from resource."));
-		return FALSE;
+VOID CLauncherButton::LoadIconPng() {
+	if (!m_iconPng.Load(m_info.iconPngResource, AfxGetResourceHandle())) {
+		AfxMessageBox(_T("Error: Cannot load the icon file from resource."));
 	}
-
-	return TRUE;
 }
 
 
 // Draws the icon that scale and invert color.
-void CLauncherButton::DrawSteamImage(CDC* pDC, const CRect& rect) {
+VOID CLauncherButton::DrawIconPng(CDC* pDC, const CRect& rect) {
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 	// target size
-	const int destW = MulDiv(20, iDpi, USER_DEFAULT_SCREEN_DPI),
-	          destH = MulDiv(20, iDpi, USER_DEFAULT_SCREEN_DPI);
-	int x = rect.left + (rect.Width() - destW) / 2;  // 水平居中
-	int y = rect.top + (rect.Height() - destH) / 2;  // 垂直居中
+	const int destW = MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI),
+	          destH = MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);
+	int x = rect.left + (rect.Width() - destW) / 2;  // horizontally centered
+	int y = rect.top + (rect.Height() - destH) / 2;  // vertically centered
 
 	CDC memDC;
 	memDC.CreateCompatibleDC(pDC);
-	CBitmap* pOldBitmap = memDC.SelectObject(&m_imgSteam);
+	CBitmap* pOldBitmap = memDC.SelectObject(&m_iconPng);
 
 	BITMAP bm;
-	m_imgSteam.GetBitmap(&bm);
+	m_iconPng.GetBitmap(&bm);
 
 	BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
 	pDC->AlphaBlend(x, y, destW, destH, &memDC, 0, 0, bm.bmWidth,
@@ -234,7 +254,7 @@ BOOL CLauncherButton::IsFileExists(const CString& fileName) {
 	// If the filename does not contain a path, search for the system path.
 	if (fileName.Find(_T('\\')) == -1 && fileName.Find(_T('/')) == -1) {
 		TCHAR szPath[MAX_PATH];
-		if (SearchPath(NULL, fileName, NULL, MAX_PATH, szPath, NULL)) {
+		if (SearchPath(nullptr, fileName, nullptr, MAX_PATH, szPath, nullptr)) {
 			return TRUE;
 		}
 		return FALSE;
@@ -244,7 +264,7 @@ BOOL CLauncherButton::IsFileExists(const CString& fileName) {
 }
 
 
-void CLauncherButton::SendKeyCombination(const CString& keyCombination) {
+VOID CLauncherButton::SendKeyCombination(const CString& keyCombination) {
 	INT length = keyCombination.GetLength(), lengthDouble = length * 2, i;
 	INPUT* inputs = new INPUT[lengthDouble]();
 

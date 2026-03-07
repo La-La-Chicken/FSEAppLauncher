@@ -16,7 +16,7 @@ enum PreferredAppMode { Default, AllowDark, ForceDark, ForceLight };
 
 void ApplyDarkModeSettings(HWND hWnd) {
 	HMODULE hUxtheme = LoadLibraryEx(_T("uxtheme.dll"),
-	                                 NULL,
+	                                 nullptr,
 	                                 LOAD_LIBRARY_SEARCH_SYSTEM32);
 	if (!hUxtheme) {
 		return;
@@ -83,7 +83,7 @@ int CBaseDialog::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	BOOL bTRUE = TRUE;
 	BOOL bDarkMode = IsDarkMode();
 	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
-	INT nValue = 2;	/* = DWMWCP_ROUND *//* = DWMSBT_MAINWINDOW */
+	INT nValue = 2;	// = DWMWCP_ROUND, DWMSBT_MAINWINDOW
 
 	DwmSetWindowAttribute(GetSafeHwnd(),
 	                      DWMWA_DISALLOW_PEEK,
@@ -116,7 +116,7 @@ int CBaseDialog::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	GetWindowRect(&rect);
 
 	// Inform the application of the frame change.
-	SetWindowPos(NULL, rect.left, rect.top,
+	SetWindowPos(nullptr, rect.left, rect.top,
 	             rect.Width(), rect.Height(),
 	             SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
 
@@ -167,18 +167,19 @@ void CBaseDialog::OnSettingChange(UINT uFlags, LPCTSTR lpszSection) {
 
 	// Update the dark mode of the title bar.
 	BOOL bDarkMode = IsDarkMode();
-	COLORREF rgb = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
+	COLORREF rgbBackground = bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243);
 
 	DwmSetWindowAttribute(GetSafeHwnd(),
 	                      DWMWA_USE_IMMERSIVE_DARK_MODE,
 	                      &bDarkMode,
 	                      sizeof(bDarkMode));
+	// The text is the same color as the background to make it visually invisible.
 	DwmSetWindowAttribute(GetSafeHwnd(),
 	                      DWMWA_TEXT_COLOR,
-	                      &rgb,
-	                      sizeof(rgb));
+	                      &rgbBackground,
+	                      sizeof(rgbBackground));
 
 	// Redraw the window when not minimized.
-	RedrawWindow(NULL, NULL,
+	RedrawWindow(nullptr, nullptr,
 	             RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 }
