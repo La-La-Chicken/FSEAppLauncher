@@ -223,6 +223,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\FSEAppLauncher.Windows.ico" />
+    <Image Include="res\Steam_Logo.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

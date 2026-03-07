@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "FSEAppLauncher.Windows.h"
 #include <afxbutton.h>
 
 
@@ -9,11 +10,16 @@ enum class LaunchType { Exe, KeyCombination, Uri };
 
 // 按钮信息结构体
 struct ButtonInfo {
-	const TCHAR* iconChar;       // Segoe Fluent Icons character
-	const TCHAR* tooltip;        // tooltip
-	LaunchType    type;          // launch type
-	const CString target;        // target identifier (directory/URI/key combination)
-	const CString errorMessage;  // error message to show when failed to launch
+	// Segoe Fluent Icons character
+	const TCHAR*     iconChar;
+	// tooltip
+	const CString    tooltip;
+	// launch type
+	const LaunchType type;
+	// target identifier (directory/URI/key combination)
+	const CString    target;
+	// error message to show when failed to launch
+	const TCHAR*     errorMessage;
 };
 
 // Declare the array. See .cpp for the definition.
@@ -39,7 +45,17 @@ protected:
 
 
 private:
-	ButtonInfo m_info;                 // button info
+	// button info
+	ButtonInfo m_info;
+
+	// the Steam logo
+	CPngImage m_imgSteam;
+	// Indicates whether it is a Steam button.
+	BOOL m_bIsSteam = FALSE;
+	// helper function for loading icons
+	BOOL LoadSteamImage();
+	// helper function for drawing icons
+	void DrawSteamImage(CDC* pDC, const CRect& rect);
 
 	BOOL IsFileExists(const CString& fileName);
 	void SendKeyCombination(const CString& keyCombination);

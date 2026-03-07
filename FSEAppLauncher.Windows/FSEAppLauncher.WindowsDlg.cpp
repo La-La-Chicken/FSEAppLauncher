@@ -162,7 +162,11 @@ BOOL CFSEAppLauncherWindowsDlg::OnCommand(WPARAM wParam, LPARAM lParam) {
 
 
 void CFSEAppLauncherWindowsDlg::OnDestroy() {
-	DestroyExplorerBrowser();
+	if (m_pExplorerBrowser) {
+		m_pExplorerBrowser->Destroy();
+		m_pExplorerBrowser->Release();
+		m_pExplorerBrowser = NULL;
+	}
 
 	CBaseDialog::OnDestroy();
 }
@@ -382,32 +386,32 @@ BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 		CString strError;
 		strError.Format(_T("Error: Cannot create the instance of ExplorerBrowser (HRESULT: 0x%X)."), hr);
 		AfxMessageBox(strError);
-		EndDialog(IDCLOSE);	// 创建失败，关闭对话框
+		EndDialog(IDCLOSE);	// Create failed, close the dialog.
 		return FALSE;
 	}
 
-	// 获取选项并设置，必须使用 EXPLORER_BROWSER_OPTIONS 数据类型，否则 GetOptions() 无法正确传参
+	// Get the options and set them.
 	EXPLORER_BROWSER_OPTIONS ebOptions;
 	m_pExplorerBrowser->GetOptions(&ebOptions);
 	ebOptions |= EBO_NAVIGATEONCE | EBO_ALWAYSNAVIGATE |
 	             EBO_NOTRAVELLOG | EBO_NOBORDER;
 	m_pExplorerBrowser->SetOptions(ebOptions);
 
-	// 设置文件夹视图
+	// Set up the folder view.
 	FOLDERSETTINGS fs;
 	fs.ViewMode = FVM_TILE;
 	fs.fFlags = FWF_AUTOARRANGE | FWF_ABBREVIATEDNAMES | FWF_SNAPTOGRID |
 	            FWF_SINGLESEL | FWF_TRANSPARENT | FWF_SINGLECLICKACTIVATE |
 	            FWF_NOWEBVIEW | FWF_FULLROWSELECT | FWF_NOHEADERINALLVIEWS;
 
-	// 初始化 ExplorerBrowser
+	// Initialize ExplorerBrowser.
 	hr = m_pExplorerBrowser->Initialize(GetSafeHwnd(),
 	                                    NewRectForExplorerBrowser(),
 	                                    &fs);
 
 	if (SUCCEEDED(hr)) {
 		LPITEMIDLIST pidl = NULL;
-		// Virtual folder "Applications"
+		// virtual folder "Applications"
 		if (SUCCEEDED(
 						SHParseDisplayName(_T("shell:::{4234d49b-0245-4df3-b780-3893943456e1}"),
 						                   NULL,
@@ -431,15 +435,6 @@ BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 	}
 
 	return TRUE;
-}
-
-
-void CFSEAppLauncherWindowsDlg::DestroyExplorerBrowser() {
-	if (m_pExplorerBrowser) {
-		m_pExplorerBrowser->Destroy();
-		m_pExplorerBrowser->Release();
-		m_pExplorerBrowser = NULL;
-	}
 }
 
 

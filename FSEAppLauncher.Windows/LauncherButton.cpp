@@ -15,72 +15,79 @@ TCHAR keyCombinationForQuickSettings[] = {VK_LWIN, 'A'};
 
 // Define the buttons (right-to-left).
 const ButtonInfo g_ButtonInfos[] = {
-	{_T("\uE7E8"), _T("Shut down"), LaunchType::Exe,
+	{_T("\uE7E8"), CString(_T("Shut down")), LaunchType::Exe,
 	 CString(_T("SlideToShutDown.exe")),
-	 CString(_T("Switch to desktop and use the Start menu to perform power operations."))},
+	 _T("Switch to desktop and use the Start menu to perform power operations.")},
 
-	{_T("\uE713"), _T("Settings"), LaunchType::Uri,
+	{_T("\uE713"), CString(_T("Settings")), LaunchType::Uri,
 	 CString(_T("ms-settings:")),
-	 CString(_T("Switch to desktop and use the Start menu to launch Settings."))},
+	 _T("Switch to desktop and use the Start menu to launch Settings.")},
 
-	{_T("\uE91C"), _T("Notifications"), LaunchType::KeyCombination,
+	{_T("\uE91C"), CString(_T("Notifications")), LaunchType::KeyCombination,
 	 CString(keyCombinationForNotifications,
 	         sizeof(keyCombinationForNotifications) / sizeof(TCHAR)),
-	 CString(_T("Switch to desktop to use this feature."))},
+	 _T("Switch to desktop to use this feature.")},
 
-	{_T("\uF8A6"), _T("Quick Settings"), LaunchType::KeyCombination,
+	{_T("\uF8A6"), CString(_T("Quick Settings")), LaunchType::KeyCombination,
 	 CString(keyCombinationForQuickSettings,
 	         sizeof(keyCombinationForQuickSettings) / sizeof(TCHAR)),
-	 CString(_T("Switch to desktop to use this feature."))},
+	 _T("Switch to desktop to use this feature.")},
 
-	{_T("\uE773"), _T("Command Palette (PowerToys)"), LaunchType::Uri,
+	{_T("\uE773"), CString(_T("Command Palette (PowerToys)")), LaunchType::Uri,
 	 CString(_T("x-cmdpal:")),
-	 CString(_T("The latest version of PowerToys is required. Download link:\n")
-	         _T("https://apps.microsoft.com/detail/XP89DCGQ3K6VLD"))},
+	 _T("The latest version of PowerToys is required. Download link:\n")
+	 _T("https://apps.microsoft.com/detail/XP89DCGQ3K6VLD")},
 
-	{_T("\uE719"), _T("Microsoft Store"), LaunchType::Uri,
+	{_T("\uE719"), CString(_T("Microsoft Store")), LaunchType::Uri,
 	 CString(_T("ms-windows-store:")),
-	 CString(_T("The latest version of Microsoft Store is required. Download link:\n")
-	         _T("https://apps.microsoft.com/detail/9WZDNCRFJBMP"))},
+	 _T("The latest version of Microsoft Store is required. Download link:\n")
+	 _T("https://apps.microsoft.com/detail/9WZDNCRFJBMP")},
 
-	{_T("\uED66"), _T("GOG Galaxy"), LaunchType::Uri,
+	{_T("\uED66"), CString(_T("GOG Galaxy")), LaunchType::Uri,
 	 CString(_T("goggalaxy:")),
-	 CString(_T("The latest version of GOG Galaxy is required. Download link:\n")
-	         _T("https://apps.microsoft.com/detail/XPFFXW40W60KCF"))},
+	 _T("The latest version of GOG Galaxy is required. Download link:\n")
+	 _T("https://apps.microsoft.com/detail/XPFFXW40W60KCF")},
 
-	{_T("\uE7FC"), _T("Epic Games Launcher"), LaunchType::Uri,
+	{_T("\uE7FC"), CString(_T("Epic Games Launcher")), LaunchType::Uri,
 	 CString(_T("com.epicgames.launcher:")),
-	 CString(_T("The latest version of Epic Games Launcher is required. Download link:\n")
-	         _T("https://apps.microsoft.com/detail/XP99VR1BPSBQJ2"))},
+	 _T("The latest version of Epic Games Launcher is required. Download link:\n")
+	 _T("https://apps.microsoft.com/detail/XP99VR1BPSBQJ2")},
 
-	{_T("\uE7FC"), _T("EA"), LaunchType::Uri,
+	{_T("\uE7FC"), CString(_T("EA")), LaunchType::Uri,
 	 CString(_T("origin2:")),
-	 CString(_T("The latest version of EA app is required. Download link:\n")
-	         _T("https://www.ea.com/ea-app#downloads"))},
+	 _T("The latest version of EA app is required. Download link:\n")
+	 _T("https://www.ea.com/ea-app#downloads")},
 
-	{_T("\uE7FC"), _T("Steam"), LaunchType::Uri,
+	{_T(""), CString(_T("Steam Big Picture Mode")), LaunchType::Uri,
 	 CString(_T("steam://open/bigpicture")),
-	 CString(_T("The latest version of Steam is required. Download link:\n")
-	         _T("https://store.steampowered.com/about/"))},
+	 _T("The latest version of Steam is required. Download link:\n")
+	 _T("https://store.steampowered.com/about/")},
 
-	{_T("\uE7FC"), _T("Xbox"), LaunchType::Uri,
+	{_T("\uE7FC"), CString(_T("Xbox")), LaunchType::Uri,
 	 CString(_T("msgamingapp:")),
-	 CString(_T("The latest version of Xbox app is required. Download link:\n")
-	         _T("https://apps.microsoft.com/detail/9MV0B5HZVK9Z"))},
+	 _T("The latest version of Xbox app is required. Download link:\n")
+	 _T("https://apps.microsoft.com/detail/9MV0B5HZVK9Z")},
 
-	{_T("\uE774"), _T("Browser"), LaunchType::Uri,
+	{_T("\uE774"), CString(_T("Browser")), LaunchType::Uri,
 	 CString(_T("https:")),
-	 CString(_T("Switch to desktop and use the Start menu to launch a browser."))},
+	 _T("Switch to desktop and use the Start menu to launch a browser.")},
 
-	{_T("\uEC50"), _T("File Explorer"), LaunchType::Exe,
+	{_T("\uEC50"), CString(_T("File Explorer")), LaunchType::Exe,
 	 CString(_T("explorer.exe")),
-	 CString(_T("Switch to desktop and use the Start menu to launch File Explorer."))}};
+	 _T("Switch to desktop and use the Start menu to launch File Explorer.")}};
 
 const int NUM_BUTTONS = sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
 
 
 CLauncherButton::CLauncherButton(const ButtonInfo& info)
-	: m_info(info) {}
+	: m_info(info) {
+	// Find "Steam" in the tooltip.
+	if (info.tooltip.Find(_T("Steam")) >= 0) {
+		if (LoadSteamImage()) {
+			m_bIsSteam = TRUE;
+		}
+	}
+}
 
 
 
@@ -91,7 +98,7 @@ void CLauncherButton::OnPaint() {
 	int cx = rect.Width();
 	int cy = rect.Height();
 
-	// DC, 32 bit DIB.
+	// Create the memory DC and 32-bit DIB.
 	CDC memDC;
 	memDC.CreateCompatibleDC(&dc);
 	BITMAPINFO bmi = {};
@@ -115,8 +122,15 @@ void CLauncherButton::OnPaint() {
 
 	CBitmap* pOldBmp = memDC.SelectObject(pBm);
 
-	SendMessage(WM_PRINTCLIENT, (WPARAM)memDC.GetSafeHdc(),
+	// Let the button draw its own background and border (including hover and hold).
+	SendMessage(WM_PRINTCLIENT,
+	            reinterpret_cast<WPARAM>(memDC.GetSafeHdc()),
 	            PRF_CLIENT | PRF_ERASEBKGND | PRF_NONCLIENT);
+
+	// If it's a Steam button and the icon is loaded, draw the icon.
+	if (m_bIsSteam/* && !m_imgSteam.IsNull() */) {
+		DrawSteamImage(&memDC, rect);
+	}
 
 	DWORD* pPixel = (DWORD*)bits;
 	for (int i = 0; i < cx * cy; ++i) {
@@ -125,17 +139,16 @@ void CLauncherButton::OnPaint() {
 
 	BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
 
-	AlphaBlend(dc.GetSafeHdc(),
-	           rect.left,
-	           rect.top,
-	           cx,
-	           cy,
-	           memDC.GetSafeHdc(),
-	           0,
-	           0,
-	           cx,
-	           cy,
-	           bf);
+	dc.AlphaBlend(rect.left,
+	              rect.top,
+	              cx,
+	              cy,
+	              &memDC,
+	              0,
+	              0,
+	              cx,
+	              cy,
+	              bf);
 
 	memDC.SelectObject(pOldBmp);
 	DeleteObject(HBITMAP(pBm));
@@ -177,6 +190,43 @@ void CLauncherButton::Launch() {
 		strMsg.Format(_T("Error: Failed to launch. Error code: %u"), dwErr);
 		AfxMessageBox(strMsg);
 	}
+}
+
+
+
+BOOL CLauncherButton::LoadSteamImage() {
+	if (!m_imgSteam.Load(MAKEINTRESOURCE(IDB_PNG_STEAM),
+	                     AfxGetResourceHandle())) {
+		AfxMessageBox(_T("Error: Cannot load the Steam icon from resource."));
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+
+// Draws the icon that scale and invert color.
+void CLauncherButton::DrawSteamImage(CDC* pDC, const CRect& rect) {
+	int iDpi = GetDpiForWindow(GetSafeHwnd());
+
+	// target size
+	const int destW = MulDiv(20, iDpi, USER_DEFAULT_SCREEN_DPI),
+	          destH = MulDiv(20, iDpi, USER_DEFAULT_SCREEN_DPI);
+	int x = rect.left + (rect.Width() - destW) / 2;  // 水平居中
+	int y = rect.top + (rect.Height() - destH) / 2;  // 垂直居中
+
+	CDC memDC;
+	memDC.CreateCompatibleDC(pDC);
+	CBitmap* pOldBitmap = memDC.SelectObject(&m_imgSteam);
+
+	BITMAP bm;
+	m_imgSteam.GetBitmap(&bm);
+
+	BLENDFUNCTION bf = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+	pDC->AlphaBlend(x, y, destW, destH, &memDC, 0, 0, bm.bmWidth,
+	                bm.bmHeight, bf);
+
+	memDC.SelectObject(pOldBitmap);
 }
 
 

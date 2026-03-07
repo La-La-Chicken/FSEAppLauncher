@@ -35,7 +35,6 @@ private:
 	void UpdateButtonLayout();                // update the button layout (when DPI is changed)
 
 	BOOL CreateExplorerBrowser();
-	void DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();
 	INT GetCalculatedMarginForDpi(MarginOrientation marginOrientation) const;
 	CRect NewRectForExplorerBrowser();
