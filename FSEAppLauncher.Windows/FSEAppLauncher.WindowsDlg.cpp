@@ -12,6 +12,15 @@
 
 
 
+CONST INT CFSEAppLauncherWindowsDlg::m_ncPaddingNormal = 48;
+CONST INT CFSEAppLauncherWindowsDlg::m_ncPaddingTopIncrement = 64;
+CONST INT CFSEAppLauncherWindowsDlg::m_titlePaddingTop = 46;
+CONST INT CFSEAppLauncherWindowsDlg::m_titleRectHeight = 40;
+CONST CSize CFSEAppLauncherWindowsDlg::m_btnSize = {40, 40};
+CONST INT CFSEAppLauncherWindowsDlg::m_btnMargin = 4;
+
+
+
 // CFSEAppLauncherWindowsDlg dialog
 
 
@@ -35,7 +44,6 @@ BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CBaseDialog)
 	ON_WM_DESTROY()
 	ON_WM_ACTIVATE()
 	ON_MESSAGE(WM_DPICHANGED, &CFSEAppLauncherWindowsDlg::OnDpiChangedMessage)
-	ON_WM_MOVE()
 	ON_WM_SETTINGCHANGE()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
@@ -158,20 +166,19 @@ void CFSEAppLauncherWindowsDlg::OnDestroy() {
 }
 
 
-// 重载 the action of the OK button and Enter key
-void CFSEAppLauncherWindowsDlg::OnOK() {
-}
+// Overload the action of the OK button and Enter key.
+void CFSEAppLauncherWindowsDlg::OnOK() {}
 
 
 LRESULT CFSEAppLauncherWindowsDlg::WindowProc(UINT message, WPARAM wParam,
                                               LPARAM lParam) {
-	// 先让 DWM 尝试处理消息.
+	// Let DWM try to process the message first.
 	LRESULT lResult = 0;
 	if (DwmDefWindowProc(GetSafeHwnd(), message, wParam, lParam, &lResult)) {
 		return lResult;
 	}
 
-	// DWM 未处理, 调用基类默认处理.
+	// DWM has not processed, so the base class is called to handle it by default.
 	return CBaseDialog::WindowProc(message, wParam, lParam);
 }
 
@@ -204,7 +211,7 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 
 	// Update the font of icons.
 	UpdateIconFont();
-	for (auto btn : m_buttons) {
+	for (CLauncherButton* btn : m_buttons) {
 		if (btn) {
 			btn->SetFont(&m_fntIcon);
 		}
@@ -215,17 +222,9 @@ LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
 	             nullptr,
 	             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 
+	// When the DPI changes, the WM_SIZE message is also sent.
+
 	return 0;
-}
-
-
-void CFSEAppLauncherWindowsDlg::OnMove(int x, int y) {
-	if (!(IsZoomed() || IsIconic())) {
-		ShowWindow(SW_SHOWMAXIMIZED);
-		return;
-	}
-
-	CBaseDialog::OnMove(x, y);
 }
 
 
@@ -250,17 +249,12 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 
 
 void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
-	if (nType == SIZE_RESTORED) {
-		ShowWindow(SW_SHOWMAXIMIZED);
-		return;
-	}
-
 	CBaseDialog::OnSize(nType, cx, cy);
 
-	if (nType == SIZE_MAXIMIZED) {
-		// Resize ExplorerBrowser.
+	if (nType == SIZE_MAXIMIZED || nType == SIZE_RESTORED) {
+		// Resize ExplorerBrowser and buttons.
 		if (m_pExplorerBrowser) {
-			m_pExplorerBrowser->SetRect(nullptr, NewRectForExplorerBrowser());
+			m_pExplorerBrowser->SetRect(nullptr, NewExplorerBrowserRectForDpi());
 		}
 		UpdateButtonLayout();
 	}
@@ -275,7 +269,8 @@ VOID CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 	LOGFONT lf = {};
-	lf.lfHeight = -MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);	// 18 px font
+	lf.lfHeight = -MulDiv(CLauncherButton::m_buttonIconSize, iDpi,
+	                      USER_DEFAULT_SCREEN_DPI);
 	lf.lfWeight = 550;
 	_tcscpy_s(lf.lfFaceName, LF_FACESIZE, _T("Segoe Fluent Icons"));
 	BOOL bCreated = m_fntIcon.CreateFontIndirect(&lf);
@@ -287,10 +282,39 @@ VOID CFSEAppLauncherWindowsDlg::UpdateIconFont() {
 }
 
 
+PointSize CFSEAppLauncherWindowsDlg::NewButtonPointSizeForDpi(INT index) {
+	PointSize btnPointSize;
+
+	int iDpi = GetDpiForWindow(GetSafeHwnd());
+
+	// Button size + 2 px padding.
+	btnPointSize.size.cx = MulDiv(m_btnSize.cx, iDpi, USER_DEFAULT_SCREEN_DPI) + 2;
+	btnPointSize.size.cy = MulDiv(m_btnSize.cy, iDpi, USER_DEFAULT_SCREEN_DPI) + 2;
+
+	// Margin - 2 px padding.
+	int margin = MulDiv(m_btnMargin, iDpi, USER_DEFAULT_SCREEN_DPI) - 2;
+
+	// Right margin of the button set: Right padding of the dialog - 1 px padding.
+	int rightMargin = NewMarginForDpi(MarginOrientation::Right) - 1;
+	// Top margin of the button set: Top margin of the title - 1 px padding.
+	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI) - 1;
+
+	CRect clientRect;
+	GetClientRect(&clientRect);
+
+	// right-to-left layout
+	btnPointSize.point.x = clientRect.right - rightMargin - btnPointSize.size.cx -
+	                       (margin + btnPointSize.size.cx) * index;
+	btnPointSize.point.y = clientRect.top + topMargin;
+
+	return btnPointSize;
+}
+
+
 // Create the buttons.
 VOID CFSEAppLauncherWindowsDlg::CreateButtons() {
 	// Destroy old buttons.
-	for (auto btn : m_buttons) {
+	for (CLauncherButton* btn : m_buttons) {
 		if (btn) {
 			btn->DestroyWindow();
 		}
@@ -298,26 +322,29 @@ VOID CFSEAppLauncherWindowsDlg::CreateButtons() {
 	m_buttons.clear();
 
 	// Create new buttons.
-	for (INT i = 0; i < NUM_BUTTONS; ++i) {
-		CLauncherButton* pBtn = new CLauncherButton(g_ButtonInfos[i]);
-		if (!pBtn->Create(g_ButtonInfos[i].iconChar,
+	for (INT i = 0; i < CLauncherButton::NUM_BUTTONS; ++i) {
+		CLauncherButton* pBtn =
+			new CLauncherButton(CLauncherButton::g_ButtonInfos[i]);
+		PointSize btnPointSize = NewButtonPointSizeForDpi(i);
+
+		if (!pBtn->Create(CLauncherButton::g_ButtonInfos[i].iconChar,
 		                  WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		                  CRect(0, 0, 0, 0),
+		                  CRect(btnPointSize.point.x,
+		                        btnPointSize.point.y,
+		                        btnPointSize.point.x + btnPointSize.size.cx,
+		                        btnPointSize.point.y + btnPointSize.size.cy),
 		                  this,
 		                  IDC_LAUNCHER_BTN_BASE + i)) {
 			delete pBtn;
 			continue;
 		}
 		// Set the tooltip.
-		pBtn->SetTooltip(g_ButtonInfos[i].tooltip);
+		pBtn->SetTooltip(CLauncherButton::g_ButtonInfos[i].tooltip);
 		// Set the font of icons.
 		pBtn->SetFont(&m_fntIcon);
 		// Save the pointer.
 		m_buttons.push_back(pBtn);
 	}
-
-	// Initialize the layout.
-	UpdateButtonLayout();
 }
 
 
@@ -326,38 +353,18 @@ VOID CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 		return;
 	}
 
-	int iDpi = GetDpiForWindow(GetSafeHwnd());
-
-	// Button: 40 epx + 2 px padding.
-	int btnWidth = MulDiv(40, iDpi, USER_DEFAULT_SCREEN_DPI) + 2;
-	int btnHeight = btnWidth;
-
-	// Margin: 4 epx - 2 px padding.
-	int spacing = MulDiv(4, iDpi, USER_DEFAULT_SCREEN_DPI) - 2;
-
-	// Right margin of the button set: Right padding of the dialog - 1 px padding.
-	int rightMargin = GetCalculatedMarginForDpi(MarginOrientation::Right) - 1;
-	// Top margin of the button set: Top margin of the title - 1 px padding.
-	int topMargin = MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI) - 1;
-
-	CRect clientRect;
-	GetClientRect(&clientRect);
-
-	// right-to-left layout
-	int x = clientRect.right - rightMargin - btnWidth;
-	int y = clientRect.top + topMargin;
-
-	for (size_t i = 0; i < m_buttons.size(); ++i) {
+	INT numExistingButtons = static_cast<INT>(m_buttons.size());
+	for (INT i = 0; i < numExistingButtons; ++i) {
 		CLauncherButton* pBtn = m_buttons[i];
+		PointSize btnPointSize = NewButtonPointSizeForDpi(i);
 
 		// Place the buttons at the top of the Z-order.
 		pBtn->SetWindowPos(&wndTop,
-		                   x,
-		                   y,
-		                   btnWidth,
-		                   btnHeight,
+		                   btnPointSize.point.x,
+		                   btnPointSize.point.y,
+		                   btnPointSize.size.cx,
+		                   btnPointSize.size.cy,
 		                   SWP_NOACTIVATE);
-		x -= spacing + btnWidth;
 	}
 }
 
@@ -392,7 +399,7 @@ BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 
 	// Initialize ExplorerBrowser.
 	hr = m_pExplorerBrowser->Initialize(GetSafeHwnd(),
-	                                    NewRectForExplorerBrowser(),
+	                                    NewExplorerBrowserRectForDpi(),
 	                                    &fs);
 
 	if (SUCCEEDED(hr)) {
@@ -435,16 +442,16 @@ VOID CFSEAppLauncherWindowsDlg::DestroyExplorerBrowser() {
 
 // Extend the frame into the client area.
 HRESULT CFSEAppLauncherWindowsDlg::ExtendFrameIntoClientArea() {
-	MARGINS margins = {GetCalculatedMarginForDpi(MarginOrientation::Left),
-	                   GetCalculatedMarginForDpi(MarginOrientation::Right),
-	                   GetCalculatedMarginForDpi(MarginOrientation::Top),
-	                   GetCalculatedMarginForDpi(MarginOrientation::Bottom)};
+	MARGINS margins = {NewMarginForDpi(MarginOrientation::Left),
+	                   NewMarginForDpi(MarginOrientation::Right),
+	                   NewMarginForDpi(MarginOrientation::Top),
+	                   NewMarginForDpi(MarginOrientation::Bottom)};
 
 	return DwmExtendFrameIntoClientArea(GetSafeHwnd(), &margins);
 }
 
 
-INT CFSEAppLauncherWindowsDlg::GetCalculatedMarginForDpi(MarginOrientation marginOrientation) const {
+INT CFSEAppLauncherWindowsDlg::NewMarginForDpi(MarginOrientation marginOrientation) const {
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 	switch (marginOrientation) {
@@ -477,17 +484,17 @@ INT CFSEAppLauncherWindowsDlg::GetCalculatedMarginForDpi(MarginOrientation margi
 }
 
 
-CRect CFSEAppLauncherWindowsDlg::NewRectForExplorerBrowser() {
+CRect CFSEAppLauncherWindowsDlg::NewExplorerBrowserRectForDpi() {
 	CRect rect;
 
 	// Get the display area.
 	GetClientRect(&rect);
 
-	// 调整区域, 留出一些边距.
-	INT ncPaddingLeft = GetCalculatedMarginForDpi(MarginOrientation::Left);
-	INT ncPaddingTop = GetCalculatedMarginForDpi(MarginOrientation::Top);
-	INT ncPaddingRight = GetCalculatedMarginForDpi(MarginOrientation::Right);
-	INT ncPaddingBottom = GetCalculatedMarginForDpi(MarginOrientation::Bottom);
+	// Adjust the area to allow for some margin.
+	INT ncPaddingLeft = NewMarginForDpi(MarginOrientation::Left);
+	INT ncPaddingTop = NewMarginForDpi(MarginOrientation::Top);
+	INT ncPaddingRight = NewMarginForDpi(MarginOrientation::Right);
+	INT ncPaddingBottom = NewMarginForDpi(MarginOrientation::Bottom);
 	rect.DeflateRect((ncPaddingLeft + ncPaddingRight) / 2,
 	                 (ncPaddingTop + ncPaddingBottom) / 2);
 	rect.OffsetRect((ncPaddingLeft - ncPaddingRight) / 2,
@@ -556,9 +563,9 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 
 			// Draw the title.
 			CRect rcPaint = rcClient;
-			rcPaint.left += GetCalculatedMarginForDpi(MarginOrientation::Left);
+			rcPaint.left += NewMarginForDpi(MarginOrientation::Left);
 			rcPaint.top += MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
-			rcPaint.right -= GetCalculatedMarginForDpi(MarginOrientation::Right);
+			rcPaint.right -= NewMarginForDpi(MarginOrientation::Right);
 			rcPaint.bottom = rcPaint.top +
 			                 MulDiv(m_titleRectHeight, iDpi, USER_DEFAULT_SCREEN_DPI);
 			DrawThemeTextEx(hTheme,
@@ -595,9 +602,8 @@ VOID CFSEAppLauncherWindowsDlg::SetGroupingByName() {
 	IFolderView2* pFolderView2 = nullptr;
 
 	if (SUCCEEDED(m_pExplorerBrowser->GetCurrentView(
-								IID_PPV_ARGS(&pFolderView2))) &&
-						pFolderView2) {
-		// 设置按名称分组, TRUE indicates ascending
+			IID_PPV_ARGS(&pFolderView2))) && pFolderView2) {
+		// Set to group by name. TRUE indicates ascending.
 		pFolderView2->SetGroupBy(PKEY_ItemNameDisplay, TRUE);
 
 		pFolderView2->Release();

@@ -14,6 +14,7 @@ public:
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
+
 // Implementation
 protected:
 	DECLARE_MESSAGE_MAP()

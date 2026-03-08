@@ -5,8 +5,6 @@
 #include <afxbutton.h>
 
 
-// names of the icons in m_iconPngArray
-enum class IconPng { Steam };
 // button launch type
 enum class LaunchType { Exe, KeyCombination, Uri };
 
@@ -25,10 +23,6 @@ struct ButtonInfo {
 	      PCTSTR     errorMessage;
 };
 
-// Declare the array. See .cpp for the definition.
-extern CONST ButtonInfo g_ButtonInfos[];
-extern CONST INT NUM_BUTTONS;
-
 
 
 class CLauncherButton : public CMFCButton {
@@ -36,6 +30,14 @@ class CLauncherButton : public CMFCButton {
 
 
 public:
+	static CONST INT m_buttonIconSize;
+
+ // Declare the array. See .cpp for the definition.
+	static CONST TCHAR keyCombinationForNotifications[];
+	static CONST TCHAR keyCombinationForQuickSettings[];
+	static CONST ButtonInfo g_ButtonInfos[];
+	static CONST INT NUM_BUTTONS;
+
 	CLauncherButton(const ButtonInfo& info);
 
 	// Execute operations.

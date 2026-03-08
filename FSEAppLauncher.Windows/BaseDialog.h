@@ -37,6 +37,7 @@ class CBaseDialog : public CDialogEx {
 public:
 	using CDialogEx::CDialogEx;
 
+
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);

@@ -14,14 +14,22 @@
 enum class MarginOrientation { Left, Top, Right, Bottom };
 
 
+struct PointSize {
+	CPoint point;
+	CSize size;
+};
+
+
 
 // CFSEAppLauncherWindowsDlg dialog
 class CFSEAppLauncherWindowsDlg : public CBaseDialog {
 private:
-	const INT m_ncPaddingNormal = 48;
-	const INT m_ncPaddingTopIncrement = 64;
-	const INT m_titlePaddingTop = 46;
-	const INT m_titleRectHeight = 40;
+	static CONST INT m_ncPaddingNormal;
+	static CONST INT m_ncPaddingTopIncrement;
+	static CONST INT m_titlePaddingTop;
+	static CONST INT m_titleRectHeight;
+	static CONST CSize m_btnSize;
+	static CONST INT m_btnMargin;
 
 	CFont m_fntIcon;                          // the font for icons
 
@@ -29,17 +37,23 @@ private:
 
 	std::vector<CLauncherButton*> m_buttons;  // button array
 
-	VOID UpdateIconFont();      // update the font for icons (when DPI is changed)
-	VOID CreateButtons();       // create the buttons
-	VOID UpdateButtonLayout();  // update the button layout (when DPI is changed)
+	// update the font for icons (when DPI is changed)
+	VOID UpdateIconFont();
+	// generate the top-left point and size of the button
+	PointSize NewButtonPointSizeForDpi(INT index);
+	// create the buttons
+	VOID CreateButtons();
+	// update the button layout (when DPI is changed)
+	VOID UpdateButtonLayout();
 
 	BOOL CreateExplorerBrowser();
 	VOID DestroyExplorerBrowser();
 	HRESULT ExtendFrameIntoClientArea();
-	INT GetCalculatedMarginForDpi(MarginOrientation marginOrientation) const;
-	CRect NewRectForExplorerBrowser();
+	INT NewMarginForDpi(MarginOrientation marginOrientation) const;
+	CRect NewExplorerBrowserRectForDpi();
 	VOID PaintTitle(CPaintDC* pDC);
 	VOID SetGroupingByName();
+
 
 // Construction
 public:
@@ -50,6 +64,7 @@ public:
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_FSEAPPLAUNCHERWINDOWS_DIALOG };
 #endif
+
 
 // Implementation
 protected:
@@ -67,7 +82,6 @@ protected:
 	                           LPARAM lParam) override;
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg LRESULT OnDpiChangedMessage(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnMove(int x, int y);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()

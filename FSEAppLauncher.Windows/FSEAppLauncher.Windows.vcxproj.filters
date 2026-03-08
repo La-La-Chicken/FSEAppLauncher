@@ -77,7 +77,22 @@
     <Image Include="res\FSEAppLauncher.Windows.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\Logo_EA.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Logo_Epic.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Logo_GOGGalaxy.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Logo_MSStore.png">
+      <Filter>资源文件</Filter>
+    </Image>
     <Image Include="res\Logo_Steam.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\Logo_Xbox.png">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

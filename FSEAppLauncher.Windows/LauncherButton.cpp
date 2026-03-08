@@ -10,12 +10,15 @@ BEGIN_MESSAGE_MAP(CLauncherButton, CMFCButton)
 END_MESSAGE_MAP()
 
 
+
+CONST INT CLauncherButton::m_buttonIconSize = 18;
+
 // Do not add '\0'.
-TCHAR keyCombinationForNotifications[] = {VK_LWIN, 'N'};
-TCHAR keyCombinationForQuickSettings[] = {VK_LWIN, 'A'};
+CONST TCHAR CLauncherButton::keyCombinationForNotifications[] = {VK_LWIN, 'N'};
+CONST TCHAR CLauncherButton::keyCombinationForQuickSettings[] = {VK_LWIN, 'A'};
 
 // Define the buttons (right-to-left).
-CONST ButtonInfo g_ButtonInfos[] = {
+CONST ButtonInfo CLauncherButton::g_ButtonInfos[] = {
 	{nullptr, _T("\uE7E8"),
 	 _T("Shut down"),
 	 LaunchType::Exe,
@@ -49,28 +52,28 @@ CONST ButtonInfo g_ButtonInfos[] = {
 	 _T("The latest version of PowerToys is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/XP89DCGQ3K6VLD")},
 
-	{nullptr, _T("\uE719"),
+	{MAKEINTRESOURCE(IDB_PNG_MSSTORE), _T(""),
 	 _T("Microsoft Store"),
 	 LaunchType::Uri,
 	 CString(_T("ms-windows-store:")),
 	 _T("The latest version of Microsoft Store is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/9WZDNCRFJBMP")},
 
-	{nullptr, _T("\uED66"),
+	{MAKEINTRESOURCE(IDB_PNG_GOGGALAXY), _T(""),
 	 _T("GOG Galaxy"),
 	 LaunchType::Uri,
 	 CString(_T("goggalaxy:")),
 	 _T("The latest version of GOG Galaxy is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/XPFFXW40W60KCF")},
 
-	{nullptr, _T("\uE7FC"),
+	{MAKEINTRESOURCE(IDB_PNG_EPIC), _T(""),
 	 _T("Epic Games Launcher"),
 	 LaunchType::Uri,
 	 CString(_T("com.epicgames.launcher:")),
 	 _T("The latest version of Epic Games Launcher is required. Download link:\n")
 	 _T("https://apps.microsoft.com/detail/XP99VR1BPSBQJ2")},
 
-	{nullptr, _T("\uE7FC"),
+	{MAKEINTRESOURCE(IDB_PNG_EA), _T(""),
 	 _T("EA"),
 	 LaunchType::Uri,
 	 CString(_T("origin2:")),
@@ -84,7 +87,7 @@ CONST ButtonInfo g_ButtonInfos[] = {
 	 _T("The latest version of Steam is required. Download link:\n")
 	 _T("https://store.steampowered.com/about/")},
 
-	{nullptr, _T("\uE7FC"),
+	{MAKEINTRESOURCE(IDB_PNG_XBOX), _T(""),
 	 _T("Xbox"),
 	 LaunchType::Uri,
 	 CString(_T("msgamingapp:")),
@@ -103,7 +106,8 @@ CONST ButtonInfo g_ButtonInfos[] = {
 	 CString(_T("explorer.exe")),
 	 _T("Switch to desktop and use the Start menu to launch File Explorer.")}};
 
-CONST INT NUM_BUTTONS = sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
+CONST INT CLauncherButton::NUM_BUTTONS =
+	sizeof(g_ButtonInfos) / sizeof(g_ButtonInfos[0]);
 
 
 CLauncherButton::CLauncherButton(const ButtonInfo& info)
@@ -230,8 +234,8 @@ VOID CLauncherButton::DrawIconPng(CDC* pDC, const CRect& rect) {
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 	// target size
-	const int destW = MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI),
-	          destH = MulDiv(18, iDpi, USER_DEFAULT_SCREEN_DPI);
+	const int destW = MulDiv(m_buttonIconSize, iDpi, USER_DEFAULT_SCREEN_DPI),
+	          destH = MulDiv(m_buttonIconSize, iDpi, USER_DEFAULT_SCREEN_DPI);
 	int x = rect.left + (rect.Width() - destW) / 2;  // horizontally centered
 	int y = rect.top + (rect.Height() - destH) / 2;  // vertically centered
 

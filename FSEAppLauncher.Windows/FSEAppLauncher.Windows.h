@@ -19,6 +19,7 @@ class CFSEAppLauncherApp : public CWinApp {
 private:
 	ULONG_PTR gdiplusToken;
 
+
 public:
 	CFSEAppLauncherApp();
 

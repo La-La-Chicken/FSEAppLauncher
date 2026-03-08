@@ -223,7 +223,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\FSEAppLauncher.Windows.ico" />
+    <Image Include="res\Logo_EA.png" />
+    <Image Include="res\Logo_Epic.png" />
+    <Image Include="res\Logo_GOGGalaxy.png" />
+    <Image Include="res\Logo_MSStore.png" />
     <Image Include="res\Logo_Steam.png" />
+    <Image Include="res\Logo_Xbox.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
