@@ -129,17 +129,17 @@ void CLauncherButton::OnPaint() {
 	// Create the memory DC and 32-bit DIB.
 	CDC memDC;
 	memDC.CreateCompatibleDC(&dc);
-	BITMAPINFO bmi = {};
-	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	bmi.bmiHeader.biWidth = cx;
-	bmi.bmiHeader.biHeight = -cy;
-	bmi.bmiHeader.biPlanes = 1;
-	bmi.bmiHeader.biBitCount = 32;
-	bmi.bmiHeader.biCompression = BI_RGB;
+	BITMAPINFO dib = {};
+	dib.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	dib.bmiHeader.biWidth = cx;
+	dib.bmiHeader.biHeight = -cy;
+	dib.bmiHeader.biPlanes = 1;
+	dib.bmiHeader.biBitCount = 32;
+	dib.bmiHeader.biCompression = BI_RGB;
 
 	PVOID bits;
 	HBITMAP hBm = CreateDIBSection(dc.GetSafeHdc(),
-	                               &bmi,
+	                               &dib,
 	                               DIB_RGB_COLORS,
 	                               &bits,
 	                               nullptr,
@@ -148,7 +148,7 @@ void CLauncherButton::OnPaint() {
 		return;
 	}
 
-	HGDIOBJ hOldBmp = memDC.SelectObject(hBm);
+	HGDIOBJ hBmOld = memDC.SelectObject(hBm);
 
 	// Let the button draw its own background and border (including hover and hold).
 	SendMessage(WM_PRINTCLIENT,
@@ -160,7 +160,7 @@ void CLauncherButton::OnPaint() {
 		DrawIconPng(&memDC, rect);
 	}
 
-	PDWORD pPixel = (PDWORD)bits;
+	PDWORD pPixel = static_cast<PDWORD>(bits);
 	for (int i = 0; i < cx * cy; ++i) {
 		pPixel[i] |= 0xFF000000;
 	}
@@ -178,7 +178,7 @@ void CLauncherButton::OnPaint() {
 	              cy,
 	              bf);
 
-	memDC.SelectObject(hOldBmp);
+	memDC.SelectObject(hBmOld);
 	DeleteObject(hBm);
 }
 

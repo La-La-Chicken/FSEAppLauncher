@@ -628,8 +628,8 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		return;
 	}
 
-	CDC pDCPaint;
-	if (pDCPaint.CreateCompatibleDC(pDC)) {
+	CDC memDC;
+	if (memDC.CreateCompatibleDC(pDC)) {
 		int cx = rcClient.Width();
 		int cy = rcClient.Height();
 
@@ -652,7 +652,7 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		                               nullptr,
 		                               0);
 		if (hBm) {
-			HGDIOBJ hBmOld = pDCPaint.SelectObject(hBm);
+			HGDIOBJ hBmOld = memDC.SelectObject(hBm);
 			int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 			// Setup the theme drawing options.
@@ -663,7 +663,7 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 
 			// Select a font.
 			CFont font;
-			CFont* fontOld = nullptr;
+			CFont* pFontOld = nullptr;
 			LOGFONT lgFont;
 			if (SUCCEEDED(GetThemeSysFont(hTheme, TMT_CAPTIONFONT, &lgFont))) {
 				int nHeight = -MulDiv(28, iDpi, USER_DEFAULT_SCREEN_DPI);
@@ -671,7 +671,7 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 				lgFont.lfWeight = FW_SEMIBOLD;
 				_tcscpy_s(lgFont.lfFaceName, LF_FACESIZE, _T("Segoe UI Variable Display"));
 				if (font.CreateFontIndirect(&lgFont)) {
-					fontOld = pDCPaint.SelectObject(&font);
+					pFontOld = memDC.SelectObject(&font);
 				}
 			}
 
@@ -683,7 +683,7 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 			rcPaint.bottom = rcPaint.top +
 			                 MulDiv(m_titleRectHeight, iDpi, USER_DEFAULT_SCREEN_DPI);
 			DrawThemeTextEx(hTheme,
-			                pDCPaint.m_hDC,
+			                memDC.m_hDC,
 			                0,
 			                0,
 			                _T("Apps"),
@@ -694,11 +694,11 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 			                &DttOpts);
 
 			// Blit text to the frame.
-			pDC->BitBlt(0, 0, cx, cy, &pDCPaint, 0, 0, SRCCOPY);
+			pDC->BitBlt(0, 0, cx, cy, &memDC, 0, 0, SRCCOPY);
 
-			pDCPaint.SelectObject(hBmOld);
-			if (fontOld) {
-				pDCPaint.SelectObject(fontOld);
+			memDC.SelectObject(hBmOld);
+			if (pFontOld) {
+				memDC.SelectObject(pFontOld);
 			}
 			DeleteObject(hBm);
 		}
