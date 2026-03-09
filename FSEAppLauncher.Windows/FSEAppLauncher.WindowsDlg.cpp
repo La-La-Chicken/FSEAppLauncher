@@ -645,14 +645,14 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		dib.bmiHeader.biBitCount = 32;
 		dib.bmiHeader.biCompression = BI_RGB;
 
-		CBitmap* pBm = CBitmap::FromHandle(CreateDIBSection(pDC->m_hDC,
-		                                                    &dib,
-		                                                    DIB_RGB_COLORS,
-		                                                    nullptr,
-		                                                    nullptr,
-		                                                    0));
-		if (pBm) {
-			CBitmap* pBmOld = pDCPaint.SelectObject(pBm);
+		HBITMAP hBm = CreateDIBSection(pDC->m_hDC,
+		                               &dib,
+		                               DIB_RGB_COLORS,
+		                               nullptr,
+		                               nullptr,
+		                               0);
+		if (hBm) {
+			HGDIOBJ hBmOld = pDCPaint.SelectObject(hBm);
 			int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 			// Setup the theme drawing options.
@@ -696,11 +696,11 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 			// Blit text to the frame.
 			pDC->BitBlt(0, 0, cx, cy, &pDCPaint, 0, 0, SRCCOPY);
 
-			pDCPaint.SelectObject(pBmOld);
+			pDCPaint.SelectObject(hBmOld);
 			if (fontOld) {
 				pDCPaint.SelectObject(fontOld);
 			}
-			DeleteObject(HBITMAP(pBm));
+			DeleteObject(hBm);
 		}
 	}
 	CloseThemeData(hTheme);

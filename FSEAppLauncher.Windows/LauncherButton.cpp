@@ -138,17 +138,17 @@ void CLauncherButton::OnPaint() {
 	bmi.bmiHeader.biCompression = BI_RGB;
 
 	PVOID bits;
-	CBitmap* pBm = CBitmap::FromHandle(CreateDIBSection(dc.GetSafeHdc(),
-	                                                    &bmi,
-	                                                    DIB_RGB_COLORS,
-	                                                    &bits,
-	                                                    nullptr,
-	                                                    0));
-	if (!pBm) {
+	HBITMAP hBm = CreateDIBSection(dc.GetSafeHdc(),
+	                               &bmi,
+	                               DIB_RGB_COLORS,
+	                               &bits,
+	                               nullptr,
+	                               0);
+	if (!hBm) {
 		return;
 	}
 
-	CBitmap* pOldBmp = memDC.SelectObject(pBm);
+	HGDIOBJ hOldBmp = memDC.SelectObject(hBm);
 
 	// Let the button draw its own background and border (including hover and hold).
 	SendMessage(WM_PRINTCLIENT,
@@ -178,8 +178,8 @@ void CLauncherButton::OnPaint() {
 	              cy,
 	              bf);
 
-	memDC.SelectObject(pOldBmp);
-	DeleteObject(HBITMAP(pBm));
+	memDC.SelectObject(hOldBmp);
+	DeleteObject(hBm);
 }
 
 
