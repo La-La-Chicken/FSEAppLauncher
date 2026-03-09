@@ -31,11 +31,16 @@ private:
 	static CONST CSize m_btnSize;
 	static CONST INT m_btnMargin;
 
+	static CONST PCTSTR applicationFolderPath;
+
 	CFont m_fntIcon;                          // the font for icons
 
 	IExplorerBrowser* m_pExplorerBrowser;
 
 	std::vector<CLauncherButton*> m_buttons;  // button array
+
+	// Hit test the frame for resizing and moving.
+	LRESULT HitTestNCA(WPARAM wParam, LPARAM lParam);
 
 	// update the font for icons (when DPI is changed)
 	VOID UpdateIconFont();
@@ -45,9 +50,12 @@ private:
 	VOID CreateButtons();
 	// update the button layout (when DPI is changed)
 	VOID UpdateButtonLayout();
+	// invalidate and redraw the buttons
+	VOID InvalidateButtons();
 
 	BOOL CreateExplorerBrowser();
 	VOID DestroyExplorerBrowser();
+
 	HRESULT ExtendFrameIntoClientArea();
 	INT NewMarginForDpi(MarginOrientation marginOrientation) const;
 	CRect NewExplorerBrowserRectForDpi();
@@ -81,7 +89,6 @@ protected:
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam,
 	                           LPARAM lParam) override;
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
-	afx_msg LRESULT OnDpiChangedMessage(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()

@@ -67,7 +67,6 @@ BOOL IsDarkMode() {
 BEGIN_MESSAGE_MAP(CBaseDialog, CDialogEx)
 	ON_WM_CREATE()
 	ON_WM_CTLCOLOR()
-	ON_MESSAGE(WM_NCCALCSIZE, &CBaseDialog::OnNcCalcSizeMessage)
 	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
 
@@ -140,20 +139,6 @@ HBRUSH CBaseDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) {
 
 	// Solid Background / Base
 	return CreateSolidBrush(bDarkMode ? RGB(32, 32, 32) : RGB(243, 243, 243));
-}
-
-
-LRESULT CBaseDialog::OnNcCalcSizeMessage(WPARAM wParam, LPARAM lParam) {
-	// When wParam is TRUE, the client area size needs to be calculated.
-	if (wParam == TRUE) {
-		// Returning 0 indicates that the entire window area will be used
-		//  as the client area (i.e., the standard frame is removed).
-		return 0;
-	}
-
-	// Otherwise, default processing (e.g., window
-	//  minimization/maximization calculations) is invoked.
-	return Default();
 }
 
 

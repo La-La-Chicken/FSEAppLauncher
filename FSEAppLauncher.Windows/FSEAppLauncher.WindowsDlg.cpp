@@ -19,6 +19,9 @@ CONST INT CFSEAppLauncherWindowsDlg::m_titleRectHeight = 40;
 CONST CSize CFSEAppLauncherWindowsDlg::m_btnSize = {40, 40};
 CONST INT CFSEAppLauncherWindowsDlg::m_btnMargin = 4;
 
+CONST PCTSTR CFSEAppLauncherWindowsDlg::applicationFolderPath =
+	_T("shell:::{4234d49b-0245-4df3-b780-3893943456e1}");
+
 
 
 // CFSEAppLauncherWindowsDlg dialog
@@ -43,7 +46,6 @@ BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CBaseDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
 	ON_WM_ACTIVATE()
-	ON_MESSAGE(WM_DPICHANGED, &CFSEAppLauncherWindowsDlg::OnDpiChangedMessage)
 	ON_WM_SETTINGCHANGE()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
@@ -172,14 +174,81 @@ void CFSEAppLauncherWindowsDlg::OnOK() {}
 
 LRESULT CFSEAppLauncherWindowsDlg::WindowProc(UINT message, WPARAM wParam,
                                               LPARAM lParam) {
-	// Let DWM try to process the message first.
-	LRESULT lResult = 0;
-	if (DwmDefWindowProc(GetSafeHwnd(), message, wParam, lParam, &lResult)) {
-		return lResult;
+	BOOL fCallDWP = TRUE;
+	BOOL fDwmEnabled = FALSE;
+	LRESULT lRet = 0;
+	HRESULT hr = S_OK;
+
+	// Winproc worker for custom frame issues.
+	hr = DwmIsCompositionEnabled(&fDwmEnabled);
+	if (SUCCEEDED(hr)) {
+		fCallDWP = !DwmDefWindowProc(GetSafeHwnd(), message, wParam, lParam, &lRet);
+
+		switch (message) {
+		case WM_CREATE:
+		case WM_ACTIVATE:
+		case WM_PAINT:
+			fCallDWP = TRUE;
+			lRet = 0;
+			break;
+
+		case WM_NCCALCSIZE:
+			// Handle the non-client size message.
+			if (wParam == TRUE) {
+				// Calculate new NCCALCSIZE_PARAMS based on custom NCA inset.
+				NCCALCSIZE_PARAMS* pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+
+				pncsp->rgrc[0].left = pncsp->rgrc[0].left + 0;
+				pncsp->rgrc[0].top = pncsp->rgrc[0].top + 0;
+				pncsp->rgrc[0].right = pncsp->rgrc[0].right - 0;
+				pncsp->rgrc[0].bottom = pncsp->rgrc[0].bottom - 0;
+
+				// No need to pass the message on to the DefWindowProc.
+				fCallDWP = FALSE;
+				lRet = 0;
+			}
+			break;
+
+		case WM_NCHITTEST:
+			// Handle hit testing in the NCA if not handled by DwmDefWindowProc.
+			if (lRet == 0) {
+				lRet = HitTestNCA(wParam, lParam);
+
+				if (lRet != HTNOWHERE) {
+					fCallDWP = FALSE;
+				}
+			}
+			break;
+
+		case WM_DPICHANGED:
+			// Correctly redraw the window when not minimized and not activated.
+			ExtendFrameIntoClientArea();
+
+			// Update the font of icons.
+			UpdateIconFont();
+			for (CLauncherButton* btn : m_buttons) {
+				if (btn) {
+					btn->SetFont(&m_fntIcon);
+				}
+			}
+
+			// Redraw the window to refresh the title when not minimized.
+			RedrawWindow(nullptr,
+			             nullptr,
+			             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+
+			// When the DPI changes, the WM_SIZE message is also sent.
+
+			fCallDWP = FALSE;
+			lRet = 0;
+		}
 	}
 
-	// DWM has not processed, so the base class is called to handle it by default.
-	return CBaseDialog::WindowProc(message, wParam, lParam);
+	// Winproc worker for the rest of the application.
+	if (fCallDWP) {
+		return CBaseDialog::WindowProc(message, wParam, lParam);
+	}
+	return lRet;
 }
 
 
@@ -194,37 +263,8 @@ void CFSEAppLauncherWindowsDlg::OnActivate(UINT nState, CWnd* pWndOther,
 	// If the window is active
 	ExtendFrameIntoClientArea();
 
-	// Redraw the icons of the buttons.
-	for (auto btn : m_buttons) {
-		if (btn) {
-			btn->Invalidate();
-		}
-	}
-}
-
-
-LRESULT CFSEAppLauncherWindowsDlg::OnDpiChangedMessage(WPARAM wParam,
-                                                       LPARAM lParam) {
-	// Call this function to correctly redraw the window
-	//  when not minimized and not activated.
-	ExtendFrameIntoClientArea();
-
-	// Update the font of icons.
-	UpdateIconFont();
-	for (CLauncherButton* btn : m_buttons) {
-		if (btn) {
-			btn->SetFont(&m_fntIcon);
-		}
-	}
-
-	// Redraw the window to refresh the title when not minimized.
-	RedrawWindow(nullptr,
-	             nullptr,
-	             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
-
-	// When the DPI changes, the WM_SIZE message is also sent.
-
-	return 0;
+	// Redraw the buttons.
+	InvalidateButtons();
 }
 
 
@@ -241,7 +281,7 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 			HWND hwndView = nullptr;
 			if (SUCCEEDED(spShellView3->GetWindow(&hwndView)) && hwndView) {
 				// Send WM_SETTINGCHANGE to the HWND of spShellView3.
-				::SendMessage(hwndView, WM_SETTINGCHANGE, uFlags, (LPARAM)lpszSection);
+				::SendMessage(hwndView, WM_SETTINGCHANGE, uFlags, reinterpret_cast<LPARAM>(lpszSection));
 			}
 		}
 	}
@@ -251,13 +291,69 @@ void CFSEAppLauncherWindowsDlg::OnSettingChange(UINT uFlags,
 void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 	CBaseDialog::OnSize(nType, cx, cy);
 
-	if (nType == SIZE_MAXIMIZED || nType == SIZE_RESTORED) {
+	switch (nType) {
+	case SIZE_MAXIMIZED:
+	case SIZE_RESTORED:
 		// Resize ExplorerBrowser and buttons.
 		if (m_pExplorerBrowser) {
 			m_pExplorerBrowser->SetRect(nullptr, NewExplorerBrowserRectForDpi());
 		}
 		UpdateButtonLayout();
+		// Do not "break".
+
+	case SIZE_MINIMIZED:
+		// Invalidate the buttons to avoid overlapping appearances.
+		InvalidateButtons();
 	}
+}
+
+
+LRESULT CFSEAppLauncherWindowsDlg::HitTestNCA(WPARAM wParam, LPARAM lParam) {
+	// Get the point coordinates for the hit test.
+	CPoint ptMouse = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+
+	// Get the window rectangle.
+	CRect rcWindow;
+	GetWindowRect(&rcWindow);
+
+	// Get the frame rectangle, adjusted for the style without a caption.
+	CRect rcFrame = {0};
+	AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE, NULL);
+
+	// Determine if the hit test is for resizing. Default middle (1,1).
+	USHORT uRow = 1;
+	USHORT uCol = 1;
+	BOOL fOnResizeBorder = FALSE;
+
+	// Determine if the point is at the top or bottom of the window.
+	if (ptMouse.y >= rcWindow.top &&
+	     ptMouse.y < rcWindow.top + NewMarginForDpi(MarginOrientation::Top)) {
+		fOnResizeBorder = (ptMouse.y < (rcWindow.top - rcFrame.top));
+		uRow = 0;
+	} else if (ptMouse.y < rcWindow.bottom &&
+	            ptMouse.y >= rcWindow.bottom -
+	                          NewMarginForDpi(MarginOrientation::Bottom)) {
+		uRow = 2;
+	}
+
+	// Determine if the point is at the left or right of the window.
+	if (ptMouse.x >= rcWindow.left &&
+	     ptMouse.x < rcWindow.left + NewMarginForDpi(MarginOrientation::Left)) {
+		uCol = 0;  // left side
+	} else if (ptMouse.x < rcWindow.right &&
+	            ptMouse.x >= rcWindow.right -
+	                          NewMarginForDpi(MarginOrientation::Right)) {
+		uCol = 2;  // right side
+	}
+
+	// Hit test (HTTOPLEFT, ... HTBOTTOMRIGHT)
+	LRESULT hitTests[3][3] = {
+		{HTTOPLEFT, fOnResizeBorder ? HTTOP : HTCAPTION, HTTOPRIGHT},
+		{HTLEFT, HTNOWHERE, HTRIGHT},
+		{HTBOTTOMLEFT, HTBOTTOM, HTBOTTOMRIGHT},
+	};
+
+	return hitTests[uRow][uCol];
 }
 
 
@@ -369,6 +465,15 @@ VOID CFSEAppLauncherWindowsDlg::UpdateButtonLayout() {
 }
 
 
+VOID CFSEAppLauncherWindowsDlg::InvalidateButtons() {
+	for (CLauncherButton* btn : m_buttons) {
+		if (btn) {
+			btn->Invalidate();
+		}
+	}
+}
+
+
 BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 	HRESULT hr = CoCreateInstance(CLSID_ExplorerBrowser,
 	                              nullptr,
@@ -406,7 +511,7 @@ BOOL CFSEAppLauncherWindowsDlg::CreateExplorerBrowser() {
 		LPITEMIDLIST pidl = nullptr;
 		// virtual folder "Applications"
 		if (SUCCEEDED(
-						SHParseDisplayName(_T("shell:::{4234d49b-0245-4df3-b780-3893943456e1}"),
+						SHParseDisplayName(applicationFolderPath,
 						                   nullptr,
 						                   &pidl,
 						                   0,
@@ -455,24 +560,33 @@ INT CFSEAppLauncherWindowsDlg::NewMarginForDpi(MarginOrientation marginOrientati
 	int iDpi = GetDpiForWindow(GetSafeHwnd());
 
 	switch (marginOrientation) {
+	// SM_CX(Y)FIXEDFRAME: constant value (3)
+	// SM_CXPADDEDBORDER: padded border width (default: 4)
 	case MarginOrientation::Left:
-		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
+		return GetSystemMetricsForDpi(SM_CXFIXEDFRAME, iDpi) +
+		       GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) +
+		       MulDiv(m_ncPaddingNormal,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
 
 	case MarginOrientation::Top:
-		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) +
-		              m_ncPaddingNormal + m_ncPaddingTopIncrement,
+		return GetSystemMetricsForDpi(SM_CYFIXEDFRAME, iDpi) +
+		       GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) +
+		       MulDiv(m_ncPaddingNormal + m_ncPaddingTopIncrement,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
 
 	case MarginOrientation::Right:
-		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
+		return GetSystemMetricsForDpi(SM_CXFIXEDFRAME, iDpi) +
+		       GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) +
+		       MulDiv(m_ncPaddingNormal,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
 
 	case MarginOrientation::Bottom:
-		return MulDiv(GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) + m_ncPaddingNormal,
+		return GetSystemMetricsForDpi(SM_CYFIXEDFRAME, iDpi) +
+		       GetSystemMetricsForDpi(SM_CXPADDEDBORDER, iDpi) +
+		       MulDiv(m_ncPaddingNormal,
 		              iDpi,
 		              USER_DEFAULT_SCREEN_DPI);
 
