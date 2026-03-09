@@ -32,9 +32,7 @@ class CLauncherButton : public CMFCButton {
 public:
 	static CONST INT m_buttonIconSize;
 
- // Declare the array. See .cpp for the definition.
-	static CONST TCHAR keyCombinationForNotifications[];
-	static CONST TCHAR keyCombinationForQuickSettings[];
+	static CONST TCHAR keyCombinationForSearch[];
 	static CONST ButtonInfo g_ButtonInfos[];
 	static CONST INT NUM_BUTTONS;
 

@@ -14,8 +14,7 @@ END_MESSAGE_MAP()
 CONST INT CLauncherButton::m_buttonIconSize = 18;
 
 // Do not add '\0'.
-CONST TCHAR CLauncherButton::keyCombinationForNotifications[] = {VK_LWIN, 'N'};
-CONST TCHAR CLauncherButton::keyCombinationForQuickSettings[] = {VK_LWIN, 'A'};
+CONST TCHAR CLauncherButton::keyCombinationForSearch[] = {VK_LWIN, 'C'};
 
 // Define the buttons (right-to-left).
 CONST ButtonInfo CLauncherButton::g_ButtonInfos[] = {
@@ -33,24 +32,23 @@ CONST ButtonInfo CLauncherButton::g_ButtonInfos[] = {
 
 	{nullptr, _T("\uE91C"),
 	 _T("Notifications"),
-	 LaunchType::KeyCombination,
-	 CString(keyCombinationForNotifications,
-	         sizeof(keyCombinationForNotifications) / sizeof(TCHAR)),
+	 LaunchType::Uri,
+	 CString(_T("ms-actioncenter:")),
 	 _T("Switch to desktop to use this feature.")},
 
 	{nullptr, _T("\uF8A6"),
 	 _T("Quick Settings"),
-	 LaunchType::KeyCombination,
-	 CString(keyCombinationForQuickSettings,
-	         sizeof(keyCombinationForQuickSettings) / sizeof(TCHAR)),
+	 LaunchType::Uri,
+	 CString(_T("ms-controlcenter:")),
 	 _T("Switch to desktop to use this feature.")},
 
-	{nullptr, _T("\uE773"),
-	 _T("Command Palette (PowerToys)"),
-	 LaunchType::Uri,
-	 CString(_T("x-cmdpal:")),
-	 _T("The latest version of PowerToys is required. Download link:\n")
-	 _T("https://apps.microsoft.com/detail/XP89DCGQ3K6VLD")},
+	{nullptr, _T("\uE721"),
+	 _T("Search"),
+	 LaunchType::KeyCombination,
+		// Do not use URI "ms-search:" due to a bug.
+	 CString(keyCombinationForSearch,
+	         sizeof(keyCombinationForSearch) / sizeof(TCHAR)),
+	 _T("Switch to desktop to use this feature.")},
 
 	{MAKEINTRESOURCE(IDB_PNG_MSSTORE), _T(""),
 	 _T("Microsoft Store"),
@@ -148,7 +146,13 @@ void CLauncherButton::OnPaint() {
 		return;
 	}
 
-	HGDIOBJ hBmOld = memDC.SelectObject(hBm);
+	CBitmap bm;
+	if (!bm.Attach(static_cast<HGDIOBJ>(hBm))) {
+		DeleteObject(hBm);
+		return;
+	}
+
+	CBitmap* pBmOld = memDC.SelectObject(&bm);
 
 	// Let the button draw its own background and border (including hover and hold).
 	SendMessage(WM_PRINTCLIENT,
@@ -178,8 +182,7 @@ void CLauncherButton::OnPaint() {
 	              cy,
 	              bf);
 
-	memDC.SelectObject(hBmOld);
-	DeleteObject(hBm);
+	memDC.SelectObject(pBmOld);
 }
 
 

@@ -652,55 +652,59 @@ VOID CFSEAppLauncherWindowsDlg::PaintTitle(CPaintDC* pDC) {
 		                               nullptr,
 		                               0);
 		if (hBm) {
-			HGDIOBJ hBmOld = memDC.SelectObject(hBm);
-			int iDpi = GetDpiForWindow(GetSafeHwnd());
+			CBitmap bm;
+			if (!bm.Attach(static_cast<HGDIOBJ>(hBm))) {
+				DeleteObject(hBm);
+			} else {
+				CBitmap* pBmOld = memDC.SelectObject(&bm);
+				int iDpi = GetDpiForWindow(GetSafeHwnd());
 
-			// Setup the theme drawing options.
-			DTTOPTS DttOpts = {sizeof(DTTOPTS)};
-			DttOpts.dwFlags = DTT_COMPOSITED | DTT_GLOWSIZE | DTT_TEXTCOLOR;
-			DttOpts.iGlowSize = 15;
-			DttOpts.crText = IsDarkMode() ? RGB(255, 255, 255) : RGB(26, 26, 26);
+				// Setup the theme drawing options.
+				DTTOPTS DttOpts = {sizeof(DTTOPTS)};
+				DttOpts.dwFlags = DTT_COMPOSITED | DTT_GLOWSIZE | DTT_TEXTCOLOR;
+				DttOpts.iGlowSize = 15;
+				DttOpts.crText = IsDarkMode() ? RGB(255, 255, 255) : RGB(26, 26, 26);
 
-			// Select a font.
-			CFont font;
-			CFont* pFontOld = nullptr;
-			LOGFONT lgFont;
-			if (SUCCEEDED(GetThemeSysFont(hTheme, TMT_CAPTIONFONT, &lgFont))) {
-				int nHeight = -MulDiv(28, iDpi, USER_DEFAULT_SCREEN_DPI);
-				lgFont.lfHeight = nHeight;
-				lgFont.lfWeight = FW_SEMIBOLD;
-				_tcscpy_s(lgFont.lfFaceName, LF_FACESIZE, _T("Segoe UI Variable Display"));
-				if (font.CreateFontIndirect(&lgFont)) {
-					pFontOld = memDC.SelectObject(&font);
+				// Select a font.
+				CFont font;
+				CFont* pFontOld = nullptr;
+				LOGFONT lgFont;
+				if (SUCCEEDED(GetThemeSysFont(hTheme, TMT_CAPTIONFONT, &lgFont))) {
+					int nHeight = -MulDiv(28, iDpi, USER_DEFAULT_SCREEN_DPI);
+					lgFont.lfHeight = nHeight;
+					lgFont.lfWeight = FW_SEMIBOLD;
+					_tcscpy_s(lgFont.lfFaceName, LF_FACESIZE, _T("Segoe UI Variable Display"));
+					if (font.CreateFontIndirect(&lgFont)) {
+						pFontOld = memDC.SelectObject(&font);
+					}
+				}
+
+				// Draw the title.
+				CRect rcPaint = rcClient;
+				rcPaint.left += NewMarginForDpi(MarginOrientation::Left);
+				rcPaint.top += MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
+				rcPaint.right -= NewMarginForDpi(MarginOrientation::Right);
+				rcPaint.bottom = rcPaint.top +
+				                 MulDiv(m_titleRectHeight, iDpi, USER_DEFAULT_SCREEN_DPI);
+				DrawThemeTextEx(hTheme,
+				                memDC.m_hDC,
+				                0,
+				                0,
+				                _T("Apps"),
+				                -1,
+				                DT_END_ELLIPSIS | DT_LEFT | DT_NOPREFIX |
+				                DT_SINGLELINE | DT_VCENTER,
+				                &rcPaint,
+				                &DttOpts);
+
+				// Blit text to the frame.
+				pDC->BitBlt(0, 0, cx, cy, &memDC, 0, 0, SRCCOPY);
+
+				memDC.SelectObject(pBmOld);
+				if (pFontOld) {
+					memDC.SelectObject(pFontOld);
 				}
 			}
-
-			// Draw the title.
-			CRect rcPaint = rcClient;
-			rcPaint.left += NewMarginForDpi(MarginOrientation::Left);
-			rcPaint.top += MulDiv(m_titlePaddingTop, iDpi, USER_DEFAULT_SCREEN_DPI);
-			rcPaint.right -= NewMarginForDpi(MarginOrientation::Right);
-			rcPaint.bottom = rcPaint.top +
-			                 MulDiv(m_titleRectHeight, iDpi, USER_DEFAULT_SCREEN_DPI);
-			DrawThemeTextEx(hTheme,
-			                memDC.m_hDC,
-			                0,
-			                0,
-			                _T("Apps"),
-			                -1,
-			                DT_END_ELLIPSIS | DT_LEFT | DT_NOPREFIX |
-			                DT_SINGLELINE | DT_VCENTER,
-			                &rcPaint,
-			                &DttOpts);
-
-			// Blit text to the frame.
-			pDC->BitBlt(0, 0, cx, cy, &memDC, 0, 0, SRCCOPY);
-
-			memDC.SelectObject(hBmOld);
-			if (pFontOld) {
-				memDC.SelectObject(pFontOld);
-			}
-			DeleteObject(hBm);
 		}
 	}
 	CloseThemeData(hTheme);
