@@ -39,8 +39,12 @@ public:
 
 
 protected:
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam,
+	                           LPARAM lParam) override;
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+	BOOL CustomCaptionProc(UINT message, WPARAM wParam, LPARAM lParam,
+	                       LRESULT* plResult);
 	DECLARE_MESSAGE_MAP()
 };

@@ -23,6 +23,37 @@ struct PointSize {
 
 // CFSEAppLauncherWindowsDlg dialog
 class CFSEAppLauncherWindowsDlg : public CBaseDialog {
+// Construction
+public:
+	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);  // standard constructor
+	virtual ~CFSEAppLauncherWindowsDlg();                // destructor
+
+// Dialog Data
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_FSEAPPLAUNCHERWINDOWS_DIALOG };
+#endif
+
+
+// Implementation
+protected:
+	HICON m_hIcon;
+
+	// Generated message map functions
+	virtual BOOL OnInitDialog() override;
+	afx_msg void OnDestroy();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnPaint();
+	afx_msg HCURSOR OnQueryDragIcon();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam) override;
+	// Overload the action of the OK button and Enter key.
+	virtual void OnOK() override;
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam,
+	                           LPARAM lParam) override;
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	DECLARE_MESSAGE_MAP()
+
 private:
 	static CONST INT m_ncPaddingNormal;
 	static CONST INT m_ncPaddingTopIncrement;
@@ -61,35 +92,4 @@ private:
 	CRect NewExplorerBrowserRectForDpi();
 	VOID PaintTitle(CPaintDC* pDC);
 	VOID SetGroupingByName();
-
-
-// Construction
-public:
-	CFSEAppLauncherWindowsDlg(CWnd* pParent = nullptr);  // standard constructor
-	virtual ~CFSEAppLauncherWindowsDlg();                // destructor
-
-// Dialog Data
-#ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_FSEAPPLAUNCHERWINDOWS_DIALOG };
-#endif
-
-
-// Implementation
-protected:
-	HICON m_hIcon;
-
-	// Generated message map functions
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	virtual void OnDestroy();
-	virtual void OnOK();
-	virtual LRESULT WindowProc(UINT message, WPARAM wParam,
-	                           LPARAM lParam) override;
-	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
-	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	DECLARE_MESSAGE_MAP()
 };

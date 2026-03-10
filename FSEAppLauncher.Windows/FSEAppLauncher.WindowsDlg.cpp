@@ -41,10 +41,10 @@ CFSEAppLauncherWindowsDlg::~CFSEAppLauncherWindowsDlg() {
 
 
 BEGIN_MESSAGE_MAP(CFSEAppLauncherWindowsDlg, CBaseDialog)
+	ON_WM_DESTROY()
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_WM_DESTROY()
 	ON_WM_ACTIVATE()
 	ON_WM_SETTINGCHANGE()
 	ON_WM_SIZE()
@@ -97,6 +97,13 @@ BOOL CFSEAppLauncherWindowsDlg::OnInitDialog() {
 	CreateButtons();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
+}
+
+
+void CFSEAppLauncherWindowsDlg::OnDestroy() {
+	DestroyExplorerBrowser();
+
+	CBaseDialog::OnDestroy();
 }
 
 
@@ -161,94 +168,62 @@ BOOL CFSEAppLauncherWindowsDlg::OnCommand(WPARAM wParam, LPARAM lParam) {
 }
 
 
-void CFSEAppLauncherWindowsDlg::OnDestroy() {
-	DestroyExplorerBrowser();
-
-	CBaseDialog::OnDestroy();
-}
-
-
-// Overload the action of the OK button and Enter key.
 void CFSEAppLauncherWindowsDlg::OnOK() {}
 
 
 LRESULT CFSEAppLauncherWindowsDlg::WindowProc(UINT message, WPARAM wParam,
                                               LPARAM lParam) {
-	BOOL fCallDWP = TRUE;
+	/*
+	 * DWM unrelated messages
+	 */
+	if (message == WM_DPICHANGED) {
+		// Correctly redraw the window when not minimized and not activated.
+		ExtendFrameIntoClientArea();
+
+		// Update the font of icons.
+		UpdateIconFont();
+		for (CLauncherButton* btn : m_buttons) {
+			if (btn) {
+				btn->SetFont(&m_fntIcon);
+			}
+		}
+
+		// Redraw the window to refresh the title when not minimized.
+		RedrawWindow(nullptr,
+		             nullptr,
+		             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+
+		// When the DPI changes, the WM_SIZE message is also sent.
+
+		return 0;
+	}
+
+	/*
+	 * DWM related messages
+	 */
+	BOOL bCalledDWP = FALSE;
 	BOOL fDwmEnabled = FALSE;
-	LRESULT lRet = 0;
-	HRESULT hr = S_OK;
+	LRESULT lResult = 0;
 
 	// Winproc worker for custom frame issues.
-	hr = DwmIsCompositionEnabled(&fDwmEnabled);
+	HRESULT hr = DwmIsCompositionEnabled(&fDwmEnabled);
 	if (SUCCEEDED(hr)) {
-		fCallDWP = !DwmDefWindowProc(GetSafeHwnd(), message, wParam, lParam, &lRet);
+		bCalledDWP = CustomCaptionProc(message, wParam, lParam, &lResult);
 
-		switch (message) {
-		case WM_CREATE:
-		case WM_ACTIVATE:
-		case WM_PAINT:
-			fCallDWP = TRUE;
-			lRet = 0;
-			break;
+		if (message == WM_NCHITTEST && lResult == 0) {
+			lResult = HitTestNCA(wParam, lParam);
 
-		case WM_NCCALCSIZE:
-			// Handle the non-client size message.
-			if (wParam == TRUE) {
-				// Calculate new NCCALCSIZE_PARAMS based on custom NCA inset.
-				NCCALCSIZE_PARAMS* pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-
-				pncsp->rgrc[0].left = pncsp->rgrc[0].left + 0;
-				pncsp->rgrc[0].top = pncsp->rgrc[0].top + 0;
-				pncsp->rgrc[0].right = pncsp->rgrc[0].right - 0;
-				pncsp->rgrc[0].bottom = pncsp->rgrc[0].bottom - 0;
-
-				// No need to pass the message on to the DefWindowProc.
-				fCallDWP = FALSE;
-				lRet = 0;
+			if (lResult != HTNOWHERE) {
+				bCalledDWP = TRUE;
 			}
-			break;
-
-		case WM_NCHITTEST:
-			// Handle hit testing in the NCA if not handled by DwmDefWindowProc.
-			if (lRet == 0) {
-				lRet = HitTestNCA(wParam, lParam);
-
-				if (lRet != HTNOWHERE) {
-					fCallDWP = FALSE;
-				}
-			}
-			break;
-
-		case WM_DPICHANGED:
-			// Correctly redraw the window when not minimized and not activated.
-			ExtendFrameIntoClientArea();
-
-			// Update the font of icons.
-			UpdateIconFont();
-			for (CLauncherButton* btn : m_buttons) {
-				if (btn) {
-					btn->SetFont(&m_fntIcon);
-				}
-			}
-
-			// Redraw the window to refresh the title when not minimized.
-			RedrawWindow(nullptr,
-			             nullptr,
-			             RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
-
-			// When the DPI changes, the WM_SIZE message is also sent.
-
-			fCallDWP = FALSE;
-			lRet = 0;
 		}
 	}
 
 	// Winproc worker for the rest of the application.
-	if (fCallDWP) {
-		return CBaseDialog::WindowProc(message, wParam, lParam);
+	if (!bCalledDWP) {
+		return CDialogEx::WindowProc(message, wParam, lParam);
 	}
-	return lRet;
+	return lResult;
 }
 
 
@@ -299,11 +274,12 @@ void CFSEAppLauncherWindowsDlg::OnSize(UINT nType, int cx, int cy) {
 			m_pExplorerBrowser->SetRect(nullptr, NewExplorerBrowserRectForDpi());
 		}
 		UpdateButtonLayout();
-		// Do not "break".
+		// Intentional fall-through.
 
 	case SIZE_MINIMIZED:
 		// Invalidate the buttons to avoid overlapping appearances.
 		InvalidateButtons();
+		break;
 	}
 }
 

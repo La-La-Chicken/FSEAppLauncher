@@ -71,6 +71,33 @@ BEGIN_MESSAGE_MAP(CBaseDialog, CDialogEx)
 END_MESSAGE_MAP()
 
 
+LRESULT CBaseDialog::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
+	/*
+	 * DWM unrelated messages
+	 */
+	// No messages to process.
+
+	/*
+	 * DWM related messages
+	 */
+	BOOL bCalledDWP = FALSE;
+	BOOL fDwmEnabled = FALSE;
+	LRESULT lResult = 0;
+
+	// Winproc worker for custom frame issues.
+	HRESULT hr = DwmIsCompositionEnabled(&fDwmEnabled);
+	if (SUCCEEDED(hr)) {
+		bCalledDWP = CustomCaptionProc(message, wParam, lParam, &lResult);
+	}
+
+	// Winproc worker for the rest of the application.
+	if (!bCalledDWP) {
+		return CDialogEx::WindowProc(message, wParam, lParam);
+	}
+	return lResult;
+}
+
+
 int CBaseDialog::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	int result = CDialogEx::OnCreate(lpCreateStruct);
 	if (result == -1) {
@@ -167,4 +194,38 @@ void CBaseDialog::OnSettingChange(UINT uFlags, LPCTSTR lpszSection) {
 	// Redraw the window when not minimized.
 	RedrawWindow(nullptr, nullptr,
 	             RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+}
+
+
+BOOL CBaseDialog::CustomCaptionProc(UINT message, WPARAM wParam, LPARAM lParam,
+                                    LRESULT* plResult) {
+	BOOL bCalledDWP =
+		DwmDefWindowProc(GetSafeHwnd(), message, wParam, lParam, plResult);
+
+	switch (message) {
+	case WM_CREATE:
+	case WM_ACTIVATE:
+	case WM_PAINT:
+		*plResult = 0;
+		return FALSE;
+
+	case WM_NCCALCSIZE:
+		// Handle the non-client size message.
+		if (wParam == TRUE) {
+			// Calculate new NCCALCSIZE_PARAMS based on custom NCA inset.
+			NCCALCSIZE_PARAMS* pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+
+			pncsp->rgrc[0].left = pncsp->rgrc[0].left + 0;
+			pncsp->rgrc[0].top = pncsp->rgrc[0].top + 0;
+			pncsp->rgrc[0].right = pncsp->rgrc[0].right - 0;
+			pncsp->rgrc[0].bottom = pncsp->rgrc[0].bottom - 0;
+
+			// No need to pass the message on to the DefWindowProc.
+			*plResult = 0;
+			return TRUE;
+		}
+		break;
+	}
+
+	return bCalledDWP;
 }
