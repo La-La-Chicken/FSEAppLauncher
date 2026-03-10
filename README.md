@@ -92,7 +92,7 @@ Portable Edition does not support setting as home app of FSE[^1].
 
 #### 3. Install the dependency
 
-- Double click the dependency "Microsoft.VCLibs.x64.14.00.Desktop.appx" and then click "Install".
+- Open the dependency "Microsoft.VCLibs.x64.14.00.Desktop.appx" and then click "Install".
 
   ℹ️ If the installation fails and prompts "There's a newer version of this package already installed. To install this older package instead, uninstall the one currently on your system (0x80073D06)", it indicates that the dependency is **already installed**, and **you can directly install the application**.
 <p align="center">
@@ -101,11 +101,19 @@ Portable Edition does not support setting as home app of FSE[^1].
  </picture>
 </p>
 
-#### 4. Install the application
+#### 4. Enable Developer Mode
 
-- After installing the certificate and dependency, you can install the application by double clicking "FSEAppLauncher...x64.msix" and then click "Install".
+- Enable Developer Mode in System Settings on the System → Advanced page.
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/EnableDeveloperMode_OpenSource.png" />
+ </picture>
+</p>
 
-#### 5. Configure the application as the home app[^3]
+#### 5. Install the application
+- Install the application by opening the MSIX package (FSEAppLauncher.FullEdition ... .msix) and then click "Install".
+
+#### 6. Configure the application as the home app[^3]
 
 - Open System Settings, click "Gaming", then click "Full screen experience".
 - Beside "Choose home app", select "App Launcher for Windows", and enable "Enter full screen experience on startup".
@@ -118,7 +126,8 @@ Portable Edition does not support setting as home app of FSE[^1].
 
 ### Portable Edition
 
-Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download Portable Edition (*.exe) below the Assets section. You can directly run the application without installation and configuration.
+- Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download Portable Edition (FSEAppLauncher.PortableEdition ... .exe) below the Assets section.
+- You can directly run the application without installation and configuration.
 
 Portable Edition does not support setting as home app of FSE[^1].
 
