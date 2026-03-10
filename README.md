@@ -14,14 +14,12 @@
 
 ## Highlights
 
-- Supports **setting it as home app** on devices compatible with the **FSE[^1]** feature (see "[System Requirements](#System Requirements)").
+- Supports **setting it as home app** on devices compatible with the **FSE[^1]** feature (see "[System Requirements](#system-requirements)").
 - Launch **any** app (including non-game apps) **under FSE[^1]**, eliminating the need to switch back and forth between FSE[^1] and desktop. **Brings the experience closer to tablet mode in Windows 10**.
 - Quick access to **popular gaming platforms and missing desktop features[^2]**.
 - **Native context menu** with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. A substitute to the all apps list of Start Menu.
 - Fix a major design flaw dating back to Windows 8 - **it has a power button!** But the Xbox app does not have that ;D
 - Native support for touch screen, high DPI, dark mode, and Mica.
-
-<a id="System Requirements"></a>
 
 ## System Requirements
 
