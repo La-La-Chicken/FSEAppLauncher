@@ -14,22 +14,27 @@
 
 ## Highlights
 
-- Supports **setting it as home app** on devices compatible with the **FSE[^1]** feature (see "System Requirements").
-- Supports launching **any** app (including non-game apps) **under FSE[^1]**, eliminating the need to switch back and forth between FSE[^1] and desktop. It brings the experience **closer to tablet mode in Windows 10**.
-- Provides the **native right-click menu**, with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. It can be used as a substitute to the all apps list of Start Menu.
-- **[New]** Provides a set of buttons for quick access to **commonly used features[^2]**.
-- **[New]** Provides native support for touch screen, high DPI, and dark mode.
+- Supports **setting it as home app** on devices compatible with the **FSE[^1]** feature (see "[System Requirements](#System Requirements)").
+- Launch **any** app (including non-game apps) **under FSE[^1]**, eliminating the need to switch back and forth between FSE[^1] and desktop. **Brings the experience closer to tablet mode in Windows 10**.
+- Quick access to **popular gaming platforms and missing desktop features[^2]**.
+- **Native context menu** with suppport for "Run as administrator", "Open new window", "Open file location", "Uninstall", etc. A substitute to the all apps list of Start Menu.
+- Fix a major design flaw dating back to Windows 8 - **it has a power button!** But the Xbox app does not have that ;D
+- Native support for touch screen, high DPI, dark mode, and Mica.
+
+<a id="System Requirements"></a>
 
 ## System Requirements
 
 #### Minimum requirements
 
-- Windows 11, version 22H2+
+- Windows 11, version 21H2+
 
-#### Other requirements (if you intend to set the application as home app of full screen experience)
+#### Other requirements (if you intend to set it as home app of FSE[^1])
 
 - Windows 11, version 25H2+
 - The device is a gaming handheld
+
+Portable Edition does not support setting as home app of FSE[^1].
 
 ## Screenshots
 
@@ -41,12 +46,14 @@
 
 ## Installation and Configuration
 
+### Full Edition
+
 #### 1. Download package from Github
 
-- Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download the archive below the Assets section.
+- Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download the archive of Full Edition below the Assets section.
 <p align="center">
  <picture>
-  <img src="./doc/images/readme/DownloadReleaseArchive_OpenSource.png" />
+  <img src="./doc/images/readme/DownloadFullEditionArchive_OpenSource.png" />
  </picture>
 </p>
 
@@ -109,21 +116,34 @@
  </picture>
 </p>
 
+### Portable Edition
+
+Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download Portable Edition (*.exe) below the Assets section. You can directly run the application without installation and configuration.
+
+Portable Edition does not support setting as home app of FSE[^1].
+
+<p align="center">
+ <picture>
+  <img src="./doc/images/readme/DownloadPortableEdition_OpenSource.png" />
+ </picture>
+</p>
+
 ## What's new
 
-#### Current - Version 26.30.1440.0 (March 2026)
+#### Current - Version 26.32.14370.0
 
-- Added a set of buttons for quick access to commonly used features.
-- Now the App Launcher UI no longer covers the taskbar.
-- Fixed an issue where the App Launcher UI would not automatically hide after launching an app in some cases.
-- Updated to Per-Monitor v2 DPI awareness mode to adapt to dynamic DPI changes.
-- Adapted to dynamic light / dark mode changes.
-- Added backward compatibility for Windows 11, version 22H2 and 23H2.
+- Added the unpackaged Portable Edition (does not support setting as home app of FSE).
+- Added more buttons for quick access to popular game platforms and desktop features.
+- Replaced the Command Palette button with the Search button to provide a consistent experience with the desktop environment. On eligible devices, it launches Copilot or a user-specified AI app.
+- The App Launcher UI is no longer forced to be maximized, no longer topmost, and no longer minimized when losing focus.
+- Added touch-friendly resizing borders for non-maximized windows.
+- Added an About box.
+- Added backward compatibility for Windows 11, version 21H2.
 
 
 ## Developing and debugging
 
-Use the toolchain to develop:
+Use the toolchain to develop this project:
 
 - Windows 10, version 1607+
 - Microsoft Visual Studio 2017+
@@ -132,7 +152,7 @@ Use the toolchain to develop:
 		- Windows 10 SDK (10.0.19041)
 		- C++ MFC development tools
 
-**Windows 11, version 22H2+ is required to run or debug the packaged application.**
+Windows 11, version 21H2+ is required to run or debug the application.
 
 ## Contributing
 
@@ -148,8 +168,10 @@ This project is licensed under the Unlicense.
 
 This means unlicensed works, modifications, and larger works may be distributed under different terms and without source code.
 
+[Notices and Information](NOTICE.md)
+
 
 
 [^1]:Also known as "Xbox Handheld Mode".
-[^2]:The "Xbox" feature requires the latest version of [Game Bar](https://apps.microsoft.com/detail/9NZKPSTSNW4P), [Xbox app](https://apps.microsoft.com/detail/9MV0B5HZVK9Z) and [Gaming Services](https://apps.microsoft.com/detail/9MWPM2CQNLHN). The "Command Palette" feature requires the latest version of [Microsoft PowerToys](https://apps.microsoft.com/detail/XP89DCGQ3K6VLD).
+[^2]:The "Xbox" feature requires the latest version of [Game Bar](https://apps.microsoft.com/detail/9NZKPSTSNW4P), [Xbox app](https://apps.microsoft.com/detail/9MV0B5HZVK9Z) and [Gaming Services](https://apps.microsoft.com/detail/9MWPM2CQNLHN). The "Steam Big Picture Mode" feature requires the latest version of [Steam](https://store.steampowered.com/about/). The "EA" feature requires the latest version of [EA app](https://www.ea.com/ea-app#downloads). The "Epic Games Launcher" feature requires the latest version of [Epic Games Launcher](https://apps.microsoft.com/detail/XP99VR1BPSBQJ2). The "GOG Galaxy" feature requires the latest version of [GOG Galaxy](https://apps.microsoft.com/detail/XPFFXW40W60KCF). The "Microsoft Store" feature requires the latest version of [Microsoft Store](https://apps.microsoft.com/detail/9WZDNCRFJBMP).
 [^3]:If your operating system version is lower than Windows 11, version 25H2, or your device is not a gaming handheld, you may not see "Full screen experience", and some options may not appear.
