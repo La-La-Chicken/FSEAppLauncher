@@ -12,7 +12,6 @@
 
 
 
-
 ## Highlights
 
 - Inspired by the deprecated **tablet mode**. Supports **setting it as home app** on devices compatible with **Xbox FSE[^1]** (see "[System Requirements](#system-requirements)").
@@ -41,6 +40,7 @@
   <img src="./doc/images/readme/Screenshot_OpenSource.png" />
  </picture>
 </p>
+
 ## Installation and Configuration
 
 There are two editions of App Launcher: Full Edition and Portable Edition. Only Full Edition supports setting as home app of FSE.
@@ -55,6 +55,7 @@ There are two editions of App Launcher: Full Edition and Portable Edition. Only 
   <img src="./doc/images/readme/EnableDeveloperMode_OpenSource.png" />
  </picture>
 </p>
+
 #### 2. Download the package
 
 - Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download the archive of Full Edition below the Assets section.
@@ -108,6 +109,7 @@ There are two editions of App Launcher: Full Edition and Portable Edition. Only 
   <img src="./doc/images/readme/InstallDependency.AlreadyInstalled_OpenSource.png" />
  </picture>
 </p>
+
 #### 5. Install App Launcher
 
 - Open the MSIX package (FSEAppLauncher.FullEdition ... .msix) and then click "Install".
