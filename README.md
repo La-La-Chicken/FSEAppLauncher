@@ -42,7 +42,7 @@ There are two editions of App Launcher: Full Edition and Portable Edition. Only 
 #### 1. Enable Developer Mode
 
 - Enable "Developer Mode" on the System › Advanced page in Settings.
-![Enable "Developer Mode" in Settings](./doc/images/readme/EnableDeveloperMode_OpenSource.png "Enable "Developer Mode" in Settings")
+![Enable Developer Mode in Settings](./doc/images/readme/EnableDeveloperMode_OpenSource.png "Enable Developer Mode in Settings")
 
 #### 2. Download the package
 
@@ -55,7 +55,7 @@ There are two editions of App Launcher: Full Edition and Portable Edition. Only 
 - Right-click (or press and hold on) the security certificate file (*.cer), then select "<u>I</u>nstall Certificate".
 ![Install the certificate file](./doc/images/readme/InstallCertificate_OpenSource_1.png "Install the certificate file")
 - Select "<u>L</u>ocal Machine", then click "<u>N</u>ext".
-![Select "Local Machine"](./doc/images/readme/InstallCertificate_OpenSource_2.png "Select "Local Machine"")
+![Select Local Machine](./doc/images/readme/InstallCertificate_OpenSource_2.png "Select Local Machine")
 - If the User Account Control dialog appears, click "Yes" to approve the request.
 - Select "<u>P</u>lace all certificates in the following store", and click "B<u>r</u>owse...".
 - Select "Trusted Root Certification Authorities", click "OK", then click "<u>N</u>ext".
