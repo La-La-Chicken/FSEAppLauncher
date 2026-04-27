@@ -10,7 +10,7 @@
 
 - Inspired by **tablet mode** in Windows 10. An ideal match for **Xbox mode**[^1]. **Set it as the home app** to enhance the experience. (see "[System Requirements](#system-requirements)")
 - Launch **any installed app**, **not just games**. Eliminate the need to switch back and forth between Xbox mode[^1] and desktop.
-- Quick access to **popular gaming platforms**[^2] and **missing desktop features**. Remember the Windows 8 fiasco? You no longer have to switch to desktop just to **shut down** your device.
+- Quick access to **popular gaming platforms**[^2] and **missing desktop features**. Remember the Windows 8 fiasco? You no longer have to open Game Bar just to **shut down** your device.
 - **Native context menu** with suppport for "Open file location", "Uninstall", etc. A substitute to the all apps list of Start Menu.
 - Native support for touch screen, high DPI, dark mode, and Mica.
 
@@ -27,7 +27,7 @@
 - Windows 11, version 25H2+
 - The device is a gaming handheld
 
-ℹ️ Only Full Edition supports setting as the home app of Xbox mode[^1].
+> ℹ️ Only Full Edition supports setting as the home app of Xbox mode[^1].
 
 ## Screenshots
 
@@ -42,32 +42,40 @@ There are two editions of App Launcher: Full Edition and Portable Edition. Only 
 #### 1. Enable Developer Mode
 
 - Enable "Developer Mode" on the System › Advanced page in Settings.
-![Enable Developer Mode in Settings](./doc/images/readme/EnableDeveloperMode_OpenSource.png "Enable Developer Mode in Settings")
+
+	![Enable Developer Mode in Settings](./doc/images/readme/EnableDeveloperMode_OpenSource.png "Enable Developer Mode in Settings")
 
 #### 2. Download the package
 
 - Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download the archive of Full Edition below the Assets section.
-![Download the archive of Full Edition](./doc/images/readme/DownloadFullEditionArchive_OpenSource.png "Download the archive of Full Edition")
+
+	![Download the archive of Full Edition](./doc/images/readme/DownloadFullEditionArchive_OpenSource.png "Download the archive of Full Edition")
 - Extract the archive to any directory of your choice.
 
 #### 3. Install the developer certificate
 
 - Right-click (or press and hold on) the security certificate file (*.cer), then select "<u>I</u>nstall Certificate".
-![Install the certificate file](./doc/images/readme/InstallCertificate_OpenSource_1.png "Install the certificate file")
+
+	![Install the certificate file](./doc/images/readme/InstallCertificate_OpenSource_1.png "Install the certificate file")
 - Select "<u>L</u>ocal Machine", then click "<u>N</u>ext".
-![Select Local Machine](./doc/images/readme/InstallCertificate_OpenSource_2.png "Select Local Machine")
+
+	![Select Local Machine](./doc/images/readme/InstallCertificate_OpenSource_2.png "Select Local Machine")
 - If the User Account Control dialog appears, click "Yes" to approve the request.
 - Select "<u>P</u>lace all certificates in the following store", and click "B<u>r</u>owse...".
 - Select "Trusted Root Certification Authorities", click "OK", then click "<u>N</u>ext".
-![Select certificate store](./doc/images/readme/InstallCertificate_OpenSource_3.png "Select certificate store")
+
+	![Select certificate store](./doc/images/readme/InstallCertificate_OpenSource_3.png "Select certificate store")
 - Click "<u>F</u>inish".
-![Click "Finish"](./doc/images/readme/InstallCertificate_OpenSource_4.png "Click "Finish"")
+
+	![Click Finish](./doc/images/readme/InstallCertificate_OpenSource_4.png "Click Finish")
 
 #### 4. Install the dependency
 
 - Open the dependency "Microsoft.VCLibs.x64.14.00.Desktop.appx" and then click "Install".
-ℹ️ If the installation fails and prompts "There's a newer version of this package already installed. To install this older package instead, uninstall the one currently on your system (0x80073D06)", it indicates that the dependency **has already been installed**, and **you can directly [install App Launcher](#5-install-app-launcher)**.
-![The ignorable prompt for installation failure](./doc/images/readme/InstallDependency.AlreadyInstalled_OpenSource.png "The ignorable prompt for installation failure")
+
+	> ℹ️ If the installation fails and prompts "There's a newer version of this package already installed. To install this older package instead, uninstall the one currently on your system (0x80073D06)", it indicates that the dependency **has already been installed**, and **you can directly [install App Launcher](#5-install-app-launcher)**.
+	>
+	> 	![The ignorable prompt for installation failure](./doc/images/readme/InstallDependency.AlreadyInstalled_OpenSource.png "The ignorable prompt for installation failure")
 
 #### 5. Install App Launcher
 
@@ -77,23 +85,26 @@ There are two editions of App Launcher: Full Edition and Portable Edition. Only 
 
 - Open System Settings, click "Gaming", then click "Full screen experience"[^3].
 - Beside "Choose home app", select "App Launcher for Windows", and enable "Enter full screen experience on startup".
-ℹ️ It is also recommended to enable "Show accessibility control hints in Task View" to enhance the experience of game controllers.
-![Configure Xbox mode](./doc/images/readme/ConfigureFSE_OpenSource.png "Configure Xbox mode")
+
+	> ℹ️ It is also recommended to enable "Show accessibility control hints in Task View" to enhance the experience of game controllers.
+
+	![Configure Xbox mode](./doc/images/readme/ConfigureFSE_OpenSource.png "Configure Xbox mode")
 - At your next sign-in, your device will automatically enter Xbox mode[^1] with App Launcher as the home app.
 
 ### Portable Edition
 
-ℹ️ Portable Edition does not support setting as the home app of Xbox mode[^1].
+> ℹ️ Portable Edition does not support setting as the home app of Xbox mode[^1].
 
 - Go to the [Releases](https://github.com/La-La-Chicken/FSEAppLauncher/releases/latest) page, download Portable Edition (FSEAppLauncher.PortableEdition ... .exe) below the Assets section.
-![Download Portable Edition](./doc/images/readme/DownloadPortableEdition_OpenSource.png "Download Portable Edition")
+
+	![Download Portable Edition](./doc/images/readme/DownloadPortableEdition_OpenSource.png "Download Portable Edition")
 - Directly run the application without installation and configuration.
 
 ## What's new
 
 #### Current - Version 26.32.14370.0
 
-- Added the unpackaged Portable Edition (without Xbox mode[^1] home app support).
+- Added the unpackaged Portable Edition (**no** Xbox mode[^1] home app support).
 - Added more buttons for quick access to popular game platforms and desktop features.
 - Replaced the Command Palette button with the Search button to provide a consistent experience with desktop. On eligible devices, it launches Copilot or a user-specified AI app.
 - The App Launcher UI is no longer forced to be maximized, no longer topmost, and no longer minimized when losing focus. Added touch-friendly resizing borders for non-maximized windows.
